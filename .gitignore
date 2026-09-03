@@ -1,0 +1,34 @@
+# --- secrets ---
+.env
+.env.local
+*.local.yml
+application-local.yml
+
+# --- java / maven ---
+target/
+*.class
+*.jar
+*.war
+.mvn/wrapper/maven-wrapper.jar
+
+# --- node / vite ---
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+
+# --- editors ---
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# --- os ---
+.DS_Store
+Thumbs.db
+
+# --- logs ---
+*.log
+npm-debug.log*
+yarn-error.log*
