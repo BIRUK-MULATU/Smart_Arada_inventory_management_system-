@@ -1,0 +1,3 @@
+# Enable sdkman auto-env with: sdk env
+java=21-tem
+maven=3.9.16
