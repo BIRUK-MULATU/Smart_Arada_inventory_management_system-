@@ -2,6 +2,7 @@ package com.example.inventory.support;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+import com.example.inventory.inventory.InventoryTransactionRepository;
 import com.example.inventory.product.Product;
 import com.example.inventory.product.ProductRepository;
 import com.example.inventory.user.Role;
@@ -45,12 +46,17 @@ public abstract class AbstractIntegrationTest {
 
   @Autowired protected ProductRepository productRepository;
 
+  @Autowired protected InventoryTransactionRepository inventoryTransactionRepository;
+
   @Autowired protected PasswordEncoder passwordEncoder;
 
   @Autowired protected ObjectMapper objectMapper;
 
   @BeforeEach
   void cleanDatabase() {
+    // inventory_transactions has RESTRICT foreign keys to both products and users, so it must
+    // be cleared first.
+    inventoryTransactionRepository.deleteAll();
     productRepository.deleteAll();
     userRepository.deleteAll();
   }
@@ -87,7 +93,7 @@ public abstract class AbstractIntegrationTest {
             .andReturn()
             .getResponse()
             .getContentAsString();
-    return objectMapper.readTree(response).get("token").asText();
+    return objectMapper.readTree(response).get("token").stringValue();
   }
 
   private record LoginPayload(String email, String password) {}

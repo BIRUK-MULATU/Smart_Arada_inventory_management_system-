@@ -96,7 +96,16 @@ class AuthControllerTest extends AbstractIntegrationTest {
   void meWithTamperedTokenIsUnauthorized() throws Exception {
     persistUser("employee@example.com", Role.EMPLOYEE, true);
     String token = loginAndGetToken("employee@example.com", RAW_PASSWORD);
-    String tampered = token.substring(0, token.length() - 1) + (token.endsWith("a") ? "b" : "a");
+    // Flip a character in the header segment (fixed content: {"alg":"HS...","typ":"JWT"}
+    // base64url-encoded), not the last character of the whole token: base64url's final
+    // character can carry discarded padding bits, so a naive last-char flip sometimes decodes
+    // to the exact same bytes and the "tampered" token passes verification unchanged - flaky by
+    // construction, not a real tamper-detection test. The header is always long enough and its
+    // content is fixed, so index 5 deterministically lands inside a full base64url group.
+    String header = token.substring(0, token.indexOf('.'));
+    String rest = token.substring(token.indexOf('.'));
+    char flipped = header.charAt(5) == 'a' ? 'b' : 'a';
+    String tampered = header.substring(0, 5) + flipped + header.substring(6) + rest;
 
     mockMvc
         .perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + tampered))
