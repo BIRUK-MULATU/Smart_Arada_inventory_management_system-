@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -42,6 +43,19 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiError> handleInvalidCredentials(
       InvalidCredentialsException ex, HttpServletRequest request) {
     return build(HttpStatus.UNAUTHORIZED, ex.getMessage(), request, List.of());
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ApiError> handleAccessDenied(
+      AccessDeniedException ex, HttpServletRequest request) {
+    // @PreAuthorize denials throw AuthorizationDeniedException (a subtype of this) from inside
+    // the MVC dispatch, so this handler runs instead of RestAccessDeniedHandler, which only
+    // catches denials from the URL-matcher rules in SecurityConfig (thrown before dispatch).
+    return build(
+        HttpStatus.FORBIDDEN,
+        "You do not have permission to access this resource",
+        request,
+        List.of());
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)

@@ -2,9 +2,12 @@ package com.example.inventory.support;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+import com.example.inventory.product.Product;
+import com.example.inventory.product.ProductRepository;
 import com.example.inventory.user.Role;
 import com.example.inventory.user.User;
 import com.example.inventory.user.UserRepository;
+import java.math.BigDecimal;
 import java.util.Base64;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +43,15 @@ public abstract class AbstractIntegrationTest {
 
   @Autowired protected UserRepository userRepository;
 
+  @Autowired protected ProductRepository productRepository;
+
   @Autowired protected PasswordEncoder passwordEncoder;
 
   @Autowired protected ObjectMapper objectMapper;
 
   @BeforeEach
-  void cleanUsers() {
+  void cleanDatabase() {
+    productRepository.deleteAll();
     userRepository.deleteAll();
   }
 
@@ -57,6 +63,17 @@ public abstract class AbstractIntegrationTest {
     user.setRole(role);
     user.setActive(active);
     return userRepository.save(user);
+  }
+
+  protected Product persistProduct(String name, String sku, int stockQuantity, boolean active) {
+    Product product = new Product();
+    product.setName(name);
+    product.setSku(sku);
+    product.setBasePrice(new BigDecimal("9.99"));
+    product.setStockQuantity(stockQuantity);
+    product.setLowStockThreshold(5);
+    product.setActive(active);
+    return productRepository.save(product);
   }
 
   protected String loginAndGetToken(String email, String password) throws Exception {
