@@ -91,6 +91,38 @@ class DashboardControllerTest extends AbstractIntegrationTest {
                     .formatted(UUID.randomUUID(), productId, quantity, sellingPrice)));
   }
 
+  private void syncSale(String employeeToken, UUID productId, int quantity, String sellingPrice)
+      throws Exception {
+    mockMvc.perform(
+        post("/api/sync/sales")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + employeeToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(
+                """
+                                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":%d,"sellingPrice":%s}]}
+                                """
+                    .formatted(UUID.randomUUID(), productId, quantity, sellingPrice)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("dashboardPaths")
+  void negativeStockFromAnOfflineSyncConflictDoesNotBreakAnyDashboardQuery(String path)
+      throws Exception {
+    String admin = adminToken();
+    String employee = employeeToken("employee@example.com");
+    var product = persistProduct("Oversold Widget", "WIDGET-OVERSOLD", 1, true);
+
+    // Sync a sale for more than is in stock - this drives stock_quantity negative, which every
+    // dashboard query (sums, low-stock comparisons, rankings) must tolerate without erroring.
+    syncSale(employee, product.getId(), 5, "10.00");
+    var updated = productRepository.findById(product.getId()).orElseThrow();
+    assertThat(updated.getStockQuantity()).isEqualTo(-4);
+
+    mockMvc
+        .perform(get(path).header(HttpHeaders.AUTHORIZATION, "Bearer " + admin))
+        .andExpect(status().isOk());
+  }
+
   @Test
   void summaryCountsAllProductsAndStockRegardlessOfActiveStatus() throws Exception {
     String admin = adminToken();

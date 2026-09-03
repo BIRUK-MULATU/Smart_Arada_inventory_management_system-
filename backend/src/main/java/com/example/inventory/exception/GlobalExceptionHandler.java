@@ -8,10 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,10 +37,28 @@ public class GlobalExceptionHandler {
     return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request, List.of());
   }
 
+  @ExceptionHandler({
+    HttpMessageNotReadableException.class,
+    MethodArgumentTypeMismatchException.class
+  })
+  public ResponseEntity<ApiError> handleMalformedRequest(Exception ex, HttpServletRequest request) {
+    return build(
+        HttpStatus.BAD_REQUEST,
+        "The request body or parameters could not be read",
+        request,
+        List.of());
+  }
+
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ApiError> handleNotFound(
       ResourceNotFoundException ex, HttpServletRequest request) {
     return build(HttpStatus.NOT_FOUND, ex.getMessage(), request, List.of());
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ApiError> handleNoResourceFound(
+      NoResourceFoundException ex, HttpServletRequest request) {
+    return build(HttpStatus.NOT_FOUND, "No such endpoint", request, List.of());
   }
 
   @ExceptionHandler(ConflictException.class)
