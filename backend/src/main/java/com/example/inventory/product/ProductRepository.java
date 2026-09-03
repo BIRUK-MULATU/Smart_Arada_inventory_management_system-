@@ -24,4 +24,15 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT p FROM Product p WHERE p.id = :id")
   Optional<Product> findByIdForUpdate(UUID id);
+
+  @Query("SELECT COALESCE(SUM(p.stockQuantity), 0) FROM Product p")
+  long sumStockQuantity();
+
+  @Query(
+      "SELECT COUNT(p) FROM Product p WHERE p.active = true AND p.stockQuantity <= p.lowStockThreshold")
+  long countLowStock();
+
+  @Query(
+      "SELECT p FROM Product p WHERE p.active = true AND p.stockQuantity <= p.lowStockThreshold ORDER BY p.name")
+  List<Product> findLowStock();
 }
