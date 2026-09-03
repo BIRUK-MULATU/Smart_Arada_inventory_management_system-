@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.example.inventory.inventory.InventoryTransactionRepository;
 import com.example.inventory.product.Product;
 import com.example.inventory.product.ProductRepository;
+import com.example.inventory.sale.SaleRepository;
 import com.example.inventory.user.Role;
 import com.example.inventory.user.User;
 import com.example.inventory.user.UserRepository;
@@ -48,15 +49,19 @@ public abstract class AbstractIntegrationTest {
 
   @Autowired protected InventoryTransactionRepository inventoryTransactionRepository;
 
+  @Autowired protected SaleRepository saleRepository;
+
   @Autowired protected PasswordEncoder passwordEncoder;
 
   @Autowired protected ObjectMapper objectMapper;
 
   @BeforeEach
   void cleanDatabase() {
-    // inventory_transactions has RESTRICT foreign keys to both products and users, so it must
-    // be cleared first.
+    // inventory_transactions and sales both have RESTRICT foreign keys to products/users, so
+    // they must be cleared first. sale_items cascades automatically when its parent sale is
+    // deleted.
     inventoryTransactionRepository.deleteAll();
+    saleRepository.deleteAll();
     productRepository.deleteAll();
     userRepository.deleteAll();
   }
