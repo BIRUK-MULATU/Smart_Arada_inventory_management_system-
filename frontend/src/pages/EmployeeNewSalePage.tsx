@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { extractErrorMessage } from "../api/errors";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { ErrorMessage } from "../components/ErrorMessage";
@@ -8,35 +7,37 @@ import { Input } from "../components/Input";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { CartTable } from "../features/sales/CartTable";
 import { useCart } from "../features/sales/useCart";
-import { useCreateSale } from "../features/sales/useSales";
-import { useProducts } from "../features/products/useProducts";
+import { recordSaleOffline } from "../features/sales/offlineSales";
+import { useOfflineProducts } from "../features/products/useOfflineProducts";
+import { useAuth } from "../features/auth/useAuth";
 
 export function EmployeeNewSalePage() {
-  const { data: products, isLoading } = useProducts(false);
+  const { products, fetchedAt } = useOfflineProducts();
+  const { user } = useAuth();
   const { items, addProduct, removeItem, updateQuantity, updateSellingPrice, clear, total } = useCart();
-  const createSale = useCreateSale();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filtered = products?.filter((product) => product.name.toLowerCase().includes(search.toLowerCase()));
-  const hasOverStockItem = items.some((item) => item.quantity > item.availableStock || item.quantity < 1);
+  const hasInvalidQuantityItem = items.some((item) => item.quantity < 1);
+  const hasOverStockItem = items.some((item) => item.quantity > item.availableStock);
 
   const handleSubmit = async () => {
+    if (!user) {
+      return;
+    }
     setSubmitError(null);
+    setIsSubmitting(true);
     try {
-      await createSale.mutateAsync({
-        clientTransactionId: crypto.randomUUID(),
-        items: items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          sellingPrice: item.sellingPrice,
-        })),
-      });
+      await recordSaleOffline({ employeeId: user.id, items });
       clear();
       navigate("/sales");
-    } catch (error) {
-      setSubmitError(extractErrorMessage(error, "Couldn't complete the sale. Please review and try again."));
+    } catch {
+      setSubmitError("Couldn't save the sale on this device. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -46,7 +47,10 @@ export function EmployeeNewSalePage() {
 
       <Input label="Add a product" placeholder="Search by name…" value={search} onChange={(e) => setSearch(e.target.value)} />
 
-      {isLoading && <LoadingSpinner />}
+      {!products && <LoadingSpinner />}
+      {products && fetchedAt === null && (
+        <p className="text-sm text-slate-500">Showing products from this device. Prices and stock may be out of date.</p>
+      )}
 
       {search && (
         <div className="flex flex-col gap-2">
@@ -64,7 +68,6 @@ export function EmployeeNewSalePage() {
                   addProduct(product);
                   setSearch("");
                 }}
-                disabled={product.stockQuantity < 1}
               >
                 Add
               </Button>
@@ -87,17 +90,18 @@ export function EmployeeNewSalePage() {
             <span>Total</span>
             <span>${total.toFixed(2)}</span>
           </div>
+          {hasOverStockItem && (
+            <p className="mt-2 text-sm text-amber-700">
+              One or more items exceed the last known stock count. The sale will still be saved and reviewed if stock is short.
+            </p>
+          )}
           {submitError && (
             <div className="mt-3">
               <ErrorMessage message={submitError} />
             </div>
           )}
-          <Button
-            className="mt-3 w-full"
-            onClick={handleSubmit}
-            disabled={createSale.isPending || hasOverStockItem}
-          >
-            {createSale.isPending ? "Completing sale…" : "Complete sale"}
+          <Button className="mt-3 w-full" onClick={handleSubmit} disabled={isSubmitting || hasInvalidQuantityItem}>
+            {isSubmitting ? "Saving…" : "Complete sale"}
           </Button>
         </div>
       )}

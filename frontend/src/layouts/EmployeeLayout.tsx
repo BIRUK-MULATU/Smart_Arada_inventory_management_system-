@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { OnlineStatusBanner } from "../components/OnlineStatusBanner";
 import { useAuth } from "../features/auth/useAuth";
 
 const navItems = [
@@ -25,6 +26,7 @@ export function EmployeeLayout() {
           Log out
         </button>
       </header>
+      <OnlineStatusBanner />
       <main className="flex-1 overflow-y-auto p-4 pb-24">
         <Outlet />
       </main>

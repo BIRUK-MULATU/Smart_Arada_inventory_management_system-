@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import type { Product } from "../../types/product";
 
 export interface CartItem {
   productId: string;
@@ -9,10 +8,18 @@ export interface CartItem {
   availableStock: number;
 }
 
+/** Minimal shape needed to add a product to the cart - matches both the online Product type and the cached LocalProduct. */
+export interface CartAddableProduct {
+  id: string;
+  name: string;
+  basePrice: number;
+  stockQuantity: number;
+}
+
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  const addProduct = (product: Product) => {
+  const addProduct = (product: CartAddableProduct) => {
     setItems((current) => {
       if (current.some((item) => item.productId === product.id)) {
         return current;

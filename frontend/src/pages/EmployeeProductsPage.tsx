@@ -2,13 +2,12 @@ import { useState } from "react";
 import { Badge } from "../components/Badge";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
-import { ErrorMessage } from "../components/ErrorMessage";
 import { Input } from "../components/Input";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import { useProducts } from "../features/products/useProducts";
+import { useOfflineProducts } from "../features/products/useOfflineProducts";
 
 export function EmployeeProductsPage() {
-  const { data: products, isLoading, isError } = useProducts(false);
+  const { products, fetchedAt } = useOfflineProducts();
   const [search, setSearch] = useState("");
 
   const filtered = products?.filter((product) => product.name.toLowerCase().includes(search.toLowerCase()));
@@ -18,8 +17,10 @@ export function EmployeeProductsPage() {
       <h1 className="text-xl font-semibold text-slate-900">Products</h1>
       <Input label="Search products" placeholder="Search by name…" value={search} onChange={(e) => setSearch(e.target.value)} />
 
-      {isLoading && <LoadingSpinner />}
-      {isError && <ErrorMessage message="Couldn't load products." />}
+      {!products && <LoadingSpinner />}
+      {products && fetchedAt === null && (
+        <p className="text-sm text-slate-500">Showing products from this device. Prices and stock may be out of date.</p>
+      )}
       {filtered && filtered.length === 0 && <EmptyState message="No products found." />}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { OnlineStatusBanner } from "../components/OnlineStatusBanner";
 import { useAuth } from "../features/auth/useAuth";
 
 const navItems = [
@@ -45,8 +46,11 @@ export function AdminLayout() {
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-y-auto p-6">
-        <Outlet />
+      <main className="flex-1 overflow-y-auto">
+        <OnlineStatusBanner />
+        <div className="p-6">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
