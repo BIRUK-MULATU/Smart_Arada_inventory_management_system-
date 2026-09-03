@@ -9,6 +9,7 @@ import { CartTable } from "../features/sales/CartTable";
 import { useCart } from "../features/sales/useCart";
 import { recordSaleOffline } from "../features/sales/offlineSales";
 import { useOfflineProducts } from "../features/products/useOfflineProducts";
+import { triggerSync } from "../features/sync/syncEngine";
 import { useAuth } from "../features/auth/useAuth";
 
 export function EmployeeNewSalePage() {
@@ -33,6 +34,7 @@ export function EmployeeNewSalePage() {
     try {
       await recordSaleOffline({ employeeId: user.id, items });
       clear();
+      triggerSync();
       navigate("/sales");
     } catch {
       setSubmitError("Couldn't save the sale on this device. Please try again.");

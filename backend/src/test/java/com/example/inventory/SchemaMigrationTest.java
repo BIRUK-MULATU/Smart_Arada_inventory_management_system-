@@ -100,11 +100,55 @@ class SchemaMigrationTest {
   }
 
   @Test
-  void rejectsNegativeStockQuantity() throws SQLException {
+  void allowsNegativeStockQuantityForOfflineSyncConflicts() throws SQLException {
+    // The offline sync path (Phase 10) must be able to record a sale that already happened even
+    // when stock is short, so the database no longer enforces stock_quantity >= 0 - only the
+    // online sale path enforces that in application code.
+    UUID productId = insertProduct(-1);
+    assertThat(productId).isNotNull();
+  }
+
+  @Test
+  void rejectsInvalidSaleStatus() throws SQLException {
+    UUID employeeId = insertUser("bad-status@example.com");
     var savepoint = conn.setSavepoint();
-    assertThatThrownBy(() -> insertProduct(-1))
+
+    assertThatThrownBy(
+            () -> {
+              try (PreparedStatement ps =
+                  conn.prepareStatement(
+                      "INSERT INTO sales (id, employee_id, client_transaction_id, total_amount,"
+                          + " status) VALUES (?, ?, ?, 10.00, 'BOGUS')")) {
+                ps.setObject(1, UUID.randomUUID());
+                ps.setObject(2, employeeId);
+                ps.setObject(3, UUID.randomUUID());
+                ps.executeUpdate();
+              }
+            })
         .isInstanceOf(SQLException.class)
-        .hasMessageContaining("stock_quantity");
+        .hasMessageContaining("status");
+    conn.rollback(savepoint);
+  }
+
+  @Test
+  void rejectsResolvedSaleWithoutResolutionDetails() throws SQLException {
+    UUID employeeId = insertUser("bad-resolution@example.com");
+    var savepoint = conn.setSavepoint();
+
+    assertThatThrownBy(
+            () -> {
+              try (PreparedStatement ps =
+                  conn.prepareStatement(
+                      "INSERT INTO sales (id, employee_id, client_transaction_id, total_amount,"
+                          + " status) VALUES (?, ?, ?, 10.00, 'RESOLVED')")) {
+                ps.setObject(1, UUID.randomUUID());
+                ps.setObject(2, employeeId);
+                ps.setObject(3, UUID.randomUUID());
+                ps.executeUpdate();
+              }
+            })
+        .isInstanceOf(SQLException.class)
+        .hasMessageContaining("ck_sales_resolution_consistent");
     conn.rollback(savepoint);
   }
 
@@ -144,6 +188,29 @@ class SchemaMigrationTest {
                 + "(id, product_id, type, quantity, previous_quantity, new_quantity,"
                 + " performed_by) "
                 + "VALUES (?, ?, 'STOCK_OUT', 5, 10, 5, ?)")) {
+      ps.setObject(1, UUID.randomUUID());
+      ps.setObject(2, productId);
+      ps.setObject(3, userId);
+      int rows = ps.executeUpdate();
+      assertThat(rows).isEqualTo(1);
+    }
+  }
+
+  @Test
+  void allowsNegativeNewQuantityForOfflineSyncConflicts() throws SQLException {
+    // A STOCK_OUT driven by an offline sync conflict can legitimately drive new_quantity negative
+    // (selling more than was on hand when the device recorded the sale) - the ledger consistency
+    // check (new_quantity = previous_quantity - quantity) still applies, but the >= 0 floor does
+    // not.
+    UUID productId = insertProduct(1);
+    UUID userId = insertUser("negative-ledger@example.com");
+
+    try (PreparedStatement ps =
+        conn.prepareStatement(
+            "INSERT INTO inventory_transactions "
+                + "(id, product_id, type, quantity, previous_quantity, new_quantity,"
+                + " performed_by) "
+                + "VALUES (?, ?, 'STOCK_OUT', 3, 1, -2, ?)")) {
       ps.setObject(1, UUID.randomUUID());
       ps.setObject(2, productId);
       ps.setObject(3, userId);

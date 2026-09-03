@@ -19,6 +19,7 @@ const AdminEmployeesPage = lazy(() => import("./pages/AdminEmployeesPage").then(
 const AdminInventoryPage = lazy(() => import("./pages/AdminInventoryPage").then((m) => ({ default: m.AdminInventoryPage })));
 const AdminProductsPage = lazy(() => import("./pages/AdminProductsPage").then((m) => ({ default: m.AdminProductsPage })));
 const AdminSalesPage = lazy(() => import("./pages/AdminSalesPage").then((m) => ({ default: m.AdminSalesPage })));
+const AdminSyncPage = lazy(() => import("./pages/AdminSyncPage").then((m) => ({ default: m.AdminSyncPage })));
 const EmployeeMySalesPage = lazy(() => import("./pages/EmployeeMySalesPage").then((m) => ({ default: m.EmployeeMySalesPage })));
 const EmployeeNewSalePage = lazy(() => import("./pages/EmployeeNewSalePage").then((m) => ({ default: m.EmployeeNewSalePage })));
 const EmployeeProductsPage = lazy(() =>
@@ -52,6 +53,7 @@ function App() {
                     <Route path="/admin/products" element={<AdminProductsPage />} />
                     <Route path="/admin/inventory" element={<AdminInventoryPage />} />
                     <Route path="/admin/sales" element={<AdminSalesPage />} />
+                    <Route path="/admin/sync" element={<AdminSyncPage />} />
                     <Route path="/admin/employees" element={<AdminEmployeesPage />} />
                   </Route>
                 </Route>

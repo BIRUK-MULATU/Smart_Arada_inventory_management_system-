@@ -11,6 +11,11 @@ public record SaleResponse(
     String employeeName,
     UUID clientTransactionId,
     BigDecimal totalAmount,
+    SaleStatus status,
+    UUID resolvedByUserId,
+    String resolvedByName,
+    Instant resolvedAt,
+    String resolutionNote,
     List<SaleItemResponse> items,
     Instant createdAt,
     Instant updatedAt) {
@@ -22,6 +27,11 @@ public record SaleResponse(
         sale.getEmployee().getName(),
         sale.getClientTransactionId(),
         sale.getTotalAmount(),
+        sale.getStatus(),
+        sale.getResolvedBy() != null ? sale.getResolvedBy().getId() : null,
+        sale.getResolvedBy() != null ? sale.getResolvedBy().getName() : null,
+        sale.getResolvedAt(),
+        sale.getResolutionNote(),
         sale.getItems().stream().map(SaleItemResponse::from).toList(),
         sale.getCreatedAt(),
         sale.getUpdatedAt());

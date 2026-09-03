@@ -7,12 +7,19 @@ export interface SaleItem {
   subtotal: number;
 }
 
+export type SaleStatus = "COMPLETED" | "CONFLICT" | "RESOLVED";
+
 export interface Sale {
   id: string;
   employeeId: string;
   employeeName: string;
   clientTransactionId: string;
   totalAmount: number;
+  status: SaleStatus;
+  resolvedByUserId: string | null;
+  resolvedByName: string | null;
+  resolvedAt: string | null;
+  resolutionNote: string | null;
   items: SaleItem[];
   createdAt: string;
   updatedAt: string;

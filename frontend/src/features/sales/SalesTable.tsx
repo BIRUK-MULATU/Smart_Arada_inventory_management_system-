@@ -1,4 +1,17 @@
-import type { Sale } from "../../types/sale";
+import { Badge } from "../../components/Badge";
+import type { Sale, SaleStatus } from "../../types/sale";
+
+const statusTone: Record<SaleStatus, "neutral" | "success" | "warning" | "danger"> = {
+  COMPLETED: "success",
+  CONFLICT: "danger",
+  RESOLVED: "neutral",
+};
+
+const statusLabel: Record<SaleStatus, string> = {
+  COMPLETED: "Recorded",
+  CONFLICT: "Needs review",
+  RESOLVED: "Resolved",
+};
 
 export function SalesTable({ sales, showEmployee }: { sales: Sale[]; showEmployee: boolean }) {
   return (
@@ -10,6 +23,7 @@ export function SalesTable({ sales, showEmployee }: { sales: Sale[]; showEmploye
             <th className="px-4 py-2 text-left font-medium text-slate-600">Items</th>
             <th className="px-4 py-2 text-right font-medium text-slate-600">Total</th>
             <th className="px-4 py-2 text-left font-medium text-slate-600">When</th>
+            <th className="px-4 py-2 text-left font-medium text-slate-600">Status</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -21,6 +35,9 @@ export function SalesTable({ sales, showEmployee }: { sales: Sale[]; showEmploye
               </td>
               <td className="px-4 py-2 text-right font-medium text-slate-900">${sale.totalAmount.toFixed(2)}</td>
               <td className="px-4 py-2 text-slate-500">{new Date(sale.createdAt).toLocaleString()}</td>
+              <td className="px-4 py-2">
+                <Badge tone={statusTone[sale.status]}>{statusLabel[sale.status]}</Badge>
+              </td>
             </tr>
           ))}
         </tbody>

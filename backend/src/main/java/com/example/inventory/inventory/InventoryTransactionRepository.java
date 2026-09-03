@@ -1,5 +1,6 @@
 package com.example.inventory.inventory;
 
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,4 +11,7 @@ public interface InventoryTransactionRepository extends JpaRepository<InventoryT
   Page<InventoryTransaction> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
   Page<InventoryTransaction> findByProductIdOrderByCreatedAtDesc(UUID productId, Pageable pageable);
+
+  List<InventoryTransaction> findByReferenceTypeAndReferenceId(
+      String referenceType, UUID referenceId);
 }

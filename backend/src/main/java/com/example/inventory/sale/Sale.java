@@ -5,6 +5,8 @@ import com.example.inventory.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -12,6 +14,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +32,20 @@ public class Sale extends BaseEntity {
 
   @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
   private BigDecimal totalAmount;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private SaleStatus status = SaleStatus.COMPLETED;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "resolved_by")
+  private User resolvedBy;
+
+  @Column(name = "resolved_at")
+  private Instant resolvedAt;
+
+  @Column(name = "resolution_note")
+  private String resolutionNote;
 
   @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
   @OrderBy("id")
@@ -65,5 +82,32 @@ public class Sale extends BaseEntity {
   public void addItem(SaleItem item) {
     item.setSale(this);
     items.add(item);
+  }
+
+  public SaleStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(SaleStatus status) {
+    this.status = status;
+  }
+
+  public User getResolvedBy() {
+    return resolvedBy;
+  }
+
+  public Instant getResolvedAt() {
+    return resolvedAt;
+  }
+
+  public String getResolutionNote() {
+    return resolutionNote;
+  }
+
+  public void resolveConflict(User resolvedBy, Instant resolvedAt, String note) {
+    this.status = SaleStatus.RESOLVED;
+    this.resolvedBy = resolvedBy;
+    this.resolvedAt = resolvedAt;
+    this.resolutionNote = note;
   }
 }
