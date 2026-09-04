@@ -13,16 +13,16 @@ export function EmployeeLayout() {
   const { user, logout } = useAuth();
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
+    <div className="flex min-h-screen flex-col bg-ink-50">
+      <header className="flex items-center justify-between border-b border-ink-800 bg-ink-950 px-4 py-3">
         <div>
-          <p className="text-sm font-semibold text-slate-900">Inventory &amp; Sales</p>
-          <p className="text-xs text-slate-500">{user?.name}</p>
+          <p className="text-sm font-semibold text-gold-400">Inventory &amp; Sales</p>
+          <p className="text-xs text-ink-400">{user?.name}</p>
         </div>
         <button
           onClick={logout}
-          className="min-h-11 rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700
-            hover:bg-slate-50"
+          className="min-h-11 rounded-md border border-ink-700 px-4 py-2 text-sm font-medium text-ink-300
+            transition-colors duration-150 hover:border-gold-600/50 hover:bg-ink-900 hover:text-gold-300"
         >
           Log out
         </button>
@@ -31,14 +31,14 @@ export function EmployeeLayout() {
       <main className="flex-1 overflow-y-auto p-4 pb-24">
         <Outlet />
       </main>
-      <nav className="fixed inset-x-0 bottom-0 flex border-t border-slate-200 bg-white">
+      <nav className="fixed inset-x-0 bottom-0 flex border-t border-ink-800 bg-ink-950">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `flex flex-1 flex-col items-center justify-center gap-1 py-3 text-sm font-medium ${
-                isActive ? "text-slate-900" : "text-slate-500"
+              `flex flex-1 flex-col items-center justify-center gap-1 py-3 text-sm font-medium transition-colors duration-150 ${
+                isActive ? "text-gold-400" : "text-ink-400 hover:text-gold-300"
               }`
             }
           >

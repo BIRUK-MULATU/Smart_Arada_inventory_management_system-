@@ -59,7 +59,7 @@ export function NoteEditorModal({ note, onClose, onSave, onDelete }: NoteEditorM
           placeholder="Title"
         />
         <div className="flex flex-col gap-1">
-          <label htmlFor="note-content" className="text-sm font-medium text-slate-700">
+          <label htmlFor="note-content" className="text-sm font-medium text-ink-700">
             Note
           </label>
           <textarea
@@ -68,8 +68,9 @@ export function NoteEditorModal({ note, onClose, onSave, onDelete }: NoteEditorM
             onChange={(e) => setContent(e.target.value)}
             rows={8}
             placeholder="Write a private note - only you can see this."
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:outline
-              focus:outline-2 focus:outline-offset-1 focus:outline-slate-400"
+            className="rounded-md border border-ink-300 bg-white px-3 py-2 text-sm text-ink-900 shadow-sm
+              transition-colors duration-150 focus:outline focus:outline-2 focus:outline-offset-1
+              focus:outline-gold-500"
           />
         </div>
         {error && <ErrorMessage message={error} />}

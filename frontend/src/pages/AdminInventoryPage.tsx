@@ -37,7 +37,7 @@ export function AdminInventoryPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Inventory</h1>
+        <h1 className="text-xl font-semibold text-ink-900">Inventory</h1>
         <Button onClick={() => setDialogOpen(true)}>Stock in</Button>
       </div>
 
@@ -47,7 +47,7 @@ export function AdminInventoryPage() {
       {products && products.length > 0 && <ProductTable products={products} />}
 
       <div>
-        <h2 className="mb-2 text-lg font-semibold text-slate-900">Recent movements</h2>
+        <h2 className="mb-2 text-lg font-semibold text-ink-900">Recent movements</h2>
         {history && history.content.length === 0 && <EmptyState message="No inventory movements yet." />}
         {history && history.content.length > 0 && (
           <div className="flex flex-col gap-3">

@@ -35,8 +35,8 @@ export function AdminDashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-ink-900">Dashboard</h1>
+        <p className="text-sm text-ink-500">
           {summary.periodFrom} – {summary.periodTo}
         </p>
       </div>

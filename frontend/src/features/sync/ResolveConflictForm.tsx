@@ -44,14 +44,14 @@ export function ResolveConflictForm({ conflict, onSubmit, onCancel }: ResolveCon
         {conflict.items.map((item) => (
           <div key={item.productId} className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-medium text-slate-900">{item.productName}</p>
-              <p className="text-xs text-slate-500">Short by {item.shortfall}</p>
+              <p className="text-sm font-medium text-ink-900">{item.productName}</p>
+              <p className="text-xs text-ink-500">Short by {item.shortfall}</p>
             </div>
             <input
               type="number"
               min="0"
               aria-label={`Restock quantity for ${item.productName}`}
-              className="min-h-11 w-24 rounded-md border border-slate-300 px-2 py-1 text-sm"
+              className="min-h-11 w-24 rounded-md border border-ink-300 px-2 py-1 text-sm"
               value={quantities[item.productId]}
               onChange={(event) =>
                 setQuantities((current) => ({

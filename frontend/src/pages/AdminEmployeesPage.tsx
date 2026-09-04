@@ -52,7 +52,7 @@ export function AdminEmployeesPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Employees</h1>
+        <h1 className="text-xl font-semibold text-ink-900">Employees</h1>
         <Button onClick={() => setDialog({ mode: "create" })}>New employee</Button>
       </div>
 

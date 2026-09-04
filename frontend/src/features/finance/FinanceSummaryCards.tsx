@@ -13,11 +13,11 @@ export function FinanceSummaryCards({ summary }: { summary: FinanceSummary }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {cards.map((card) => (
-        <Card key={card.label} className={card.emphasize ? "border-slate-900" : undefined}>
-          <p className="text-xs text-slate-500">{card.label}</p>
+        <Card key={card.label} className={card.emphasize ? "border-ink-900" : undefined}>
+          <p className="text-xs text-ink-500">{card.label}</p>
           <p
             className={`mt-1 text-2xl font-semibold ${
-              card.value < 0 ? "text-red-600" : "text-slate-900"
+              card.value < 0 ? "text-red-600" : "text-ink-900"
             }`}
           >
             ${card.value.toFixed(2)}

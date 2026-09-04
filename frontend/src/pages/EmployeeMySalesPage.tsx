@@ -20,17 +20,17 @@ export function EmployeeMySalesPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold text-slate-900">My sales</h1>
+      <h1 className="text-xl font-semibold text-ink-900">My sales</h1>
 
       {hasLocalSales && (
         <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold text-slate-900">Not yet recorded</h2>
+          <h2 className="text-lg font-semibold text-ink-900">Not yet recorded</h2>
           <LocalSalesTable sales={localSales} />
         </div>
       )}
 
       <div className="flex flex-col gap-2">
-        {hasLocalSales && <h2 className="text-lg font-semibold text-slate-900">Recorded</h2>}
+        {hasLocalSales && <h2 className="text-lg font-semibold text-ink-900">Recorded</h2>}
         {isLoading && <LoadingSpinner />}
         {isError && <ErrorMessage message="Couldn't load your recorded sales." />}
         {!isLoading && !isError && !hasRecordedSales && !hasLocalSales && (

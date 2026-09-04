@@ -12,7 +12,7 @@ export function AdminSalesPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold text-slate-900">Sales</h1>
+      <h1 className="text-xl font-semibold text-ink-900">Sales</h1>
 
       {isLoading && <LoadingSpinner />}
       {isError && <ErrorMessage message="Couldn't load sales." />}

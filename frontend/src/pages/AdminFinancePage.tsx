@@ -91,8 +91,8 @@ export function AdminFinancePage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Finance</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-ink-900">Finance</h1>
+        <p className="text-sm text-ink-500">
           {from} – {to}
         </p>
       </div>
@@ -102,7 +102,7 @@ export function AdminFinancePage() {
       {summary && <FinanceSummaryCards summary={summary} />}
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-slate-900">Budgets</h2>
+        <h2 className="text-lg font-semibold text-ink-900">Budgets</h2>
         <BudgetForm onSubmit={handleAddBudget} />
         {budgetError && <ErrorMessage message={budgetError} />}
         {budgetsLoading && <LoadingSpinner />}
@@ -111,7 +111,7 @@ export function AdminFinancePage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-slate-900">Expenses</h2>
+        <h2 className="text-lg font-semibold text-ink-900">Expenses</h2>
         <ExpenseForm onSubmit={handleAddExpense} />
         {expenseError && <ErrorMessage message={expenseError} />}
         {expensesLoading && <LoadingSpinner />}

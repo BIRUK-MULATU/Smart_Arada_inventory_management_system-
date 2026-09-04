@@ -50,10 +50,10 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-xl font-semibold text-slate-900">Inventory &amp; Sales</h1>
-        <p className="mt-1 text-sm text-slate-500">Sign in to continue</p>
+    <div className="flex min-h-screen items-center justify-center bg-ink-950 px-4">
+      <div className="w-full max-w-sm animate-scale-in rounded-lg border border-gold-600/30 bg-white p-8 shadow-2xl">
+        <h1 className="text-xl font-semibold text-ink-900">Inventory &amp; Sales</h1>
+        <p className="mt-1 text-sm text-ink-500">Sign in to continue</p>
 
         <form className="mt-6 flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
           <Input

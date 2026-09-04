@@ -16,7 +16,7 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
       <Button variant="secondary" onClick={() => onPageChange(page - 1)} disabled={page === 0}>
         Previous
       </Button>
-      <span className="text-sm text-slate-500">
+      <span className="text-sm text-ink-500">
         Page {page + 1} of {totalPages}
       </span>
       <Button variant="secondary" onClick={() => onPageChange(page + 1)} disabled={page + 1 >= totalPages}>

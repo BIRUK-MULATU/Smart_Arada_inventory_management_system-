@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { extractErrorMessage } from "../api/errors";
+import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorMessage } from "../components/ErrorMessage";
@@ -33,8 +34,8 @@ export function AdminSyncPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Sync &amp; conflicts</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-ink-900">Sync &amp; conflicts</h1>
+        <p className="text-sm text-ink-500">
           Offline sales that synced with a stock shortfall. Nothing here auto-resolves - review each one and
           record a stock adjustment.
         </p>
@@ -50,20 +51,16 @@ export function AdminSyncPage() {
             <Card key={conflict.saleId} className="flex flex-col gap-3">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-medium text-slate-900">{conflict.employeeName}</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="font-medium text-ink-900">{conflict.employeeName}</p>
+                  <p className="text-sm text-ink-500">
                     Synced {new Date(conflict.syncedAt).toLocaleString()} · ${conflict.totalAmount.toFixed(2)}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setSelected(conflict)}
-                  className="min-h-11 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-                >
+                <Button type="button" onClick={() => setSelected(conflict)}>
                   Resolve
-                </button>
+                </Button>
               </div>
-              <ul className="text-sm text-slate-600">
+              <ul className="text-sm text-ink-600">
                 {conflict.items
                   .filter((item) => item.shortfall > 0)
                   .map((item) => (

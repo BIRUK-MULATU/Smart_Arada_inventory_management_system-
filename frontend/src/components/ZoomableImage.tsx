@@ -192,7 +192,7 @@ export function ZoomableImage({ src, alt, className, zoom = 3, paneSize = 420 }:
         pane &&
         createPortal(
           <div
-            className="pointer-events-none fixed z-50 overflow-hidden rounded-lg border border-slate-300 bg-white shadow-2xl"
+            className="pointer-events-none fixed z-50 overflow-hidden rounded-lg border border-ink-300 bg-white shadow-2xl"
             style={{
               left: pane.left,
               top: pane.top,

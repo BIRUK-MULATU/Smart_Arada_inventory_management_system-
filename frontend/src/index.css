@@ -1,1 +1,46 @@
 @import "tailwindcss";
+
+/* Onyx & Gold theme: "ink" replaces the old neutral gray scale (warmer, near-black at the deep
+   end) and "gold" is the new accent used for primary actions, active nav, and focus rings. */
+@theme {
+  --color-ink-50: #f7f6f4;
+  --color-ink-100: #ebe8e3;
+  --color-ink-200: #d8d3ca;
+  --color-ink-300: #c0b8ac;
+  --color-ink-400: #9c9284;
+  --color-ink-500: #6b6459;
+  --color-ink-600: #52493d;
+  --color-ink-700: #35312b;
+  --color-ink-800: #241f1a;
+  --color-ink-900: #17140f;
+  --color-ink-950: #0b0906;
+
+  --color-gold-300: #e4c98a;
+  --color-gold-400: #d4af6a;
+  --color-gold-500: #c9a227;
+  --color-gold-600: #a9841c;
+  --color-gold-700: #7c6014;
+
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-scale-in: scale-in 0.18s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

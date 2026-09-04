@@ -42,8 +42,8 @@ export function NotesPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Notes</h1>
-          <p className="text-sm text-slate-500">Private to you - nobody else, including admins, can see these.</p>
+          <h1 className="text-xl font-semibold text-ink-900">Notes</h1>
+          <p className="text-sm text-ink-500">Private to you - nobody else, including admins, can see these.</p>
         </div>
         <Button onClick={() => setIsCreating(true)}>New note</Button>
       </div>
@@ -54,15 +54,15 @@ export function NotesPage() {
         {notes?.map((note) => (
           <Card
             key={note.id}
-            className="flex cursor-pointer flex-col gap-2 hover:border-slate-300"
+            className="flex cursor-pointer flex-col gap-2 hover:border-ink-300"
             onClick={() => setEditingNote(note)}
           >
             <div className="flex items-start justify-between gap-2">
-              <p className="font-medium text-slate-900">{note.title || "Untitled"}</p>
+              <p className="font-medium text-ink-900">{note.title || "Untitled"}</p>
               {note.syncStatus !== "SYNCED" && <SyncStatusBadge status={note.syncStatus} />}
             </div>
-            <p className="line-clamp-4 whitespace-pre-wrap text-sm text-slate-600">{note.content}</p>
-            <p className="mt-auto text-xs text-slate-400">{new Date(note.updatedAtLocal).toLocaleString()}</p>
+            <p className="line-clamp-4 whitespace-pre-wrap text-sm text-ink-600">{note.content}</p>
+            <p className="mt-auto text-xs text-ink-400">{new Date(note.updatedAtLocal).toLocaleString()}</p>
           </Card>
         ))}
       </div>

@@ -65,8 +65,8 @@ export function AdminCategoriesPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold text-slate-900">Categories</h1>
-      <p className="text-sm text-slate-500">
+      <h1 className="text-xl font-semibold text-ink-900">Categories</h1>
+      <p className="text-sm text-ink-500">
         Group products (Electronics, Household, Glassware…) so they're easy to tell apart across the catalog,
         inventory, and sales.
       </p>
@@ -86,24 +86,24 @@ export function AdminCategoriesPage() {
       {categories && categories.length === 0 && <EmptyState message="No categories yet. Add the first one above." />}
 
       {categories && categories.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50">
+        <div className="overflow-x-auto rounded-lg border border-ink-200 bg-white">
+          <table className="min-w-full divide-y divide-ink-200 text-sm">
+            <thead className="bg-ink-50">
               <tr>
-                <th className="px-4 py-2 text-left font-medium text-slate-600">Name</th>
+                <th className="px-4 py-2 text-left font-medium text-ink-600">Name</th>
                 <th className="px-4 py-2" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-ink-100">
               {categories.map((category) => (
                 <tr key={category.id}>
-                  <td className="px-4 py-2 font-medium text-slate-900">
+                  <td className="px-4 py-2 font-medium text-ink-900">
                     {editingId === category.id ? (
                       <input
                         aria-label={`Rename ${category.name}`}
                         value={editingName}
                         onChange={(event) => setEditingName(event.target.value)}
-                        className="min-h-11 w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+                        className="min-h-11 w-full rounded-md border border-ink-300 px-2 py-1 text-sm"
                       />
                     ) : (
                       category.name

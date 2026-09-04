@@ -55,7 +55,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel }: EmployeeFormProps
         <option value="ADMIN">Admin</option>
       </Select>
       {employee && (
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+        <label className="flex items-center gap-2 text-sm font-medium text-ink-700">
           <input type="checkbox" className="h-4 w-4" {...register("active")} />
           Active
         </label>

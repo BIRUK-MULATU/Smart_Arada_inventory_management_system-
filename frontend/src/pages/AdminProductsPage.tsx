@@ -68,13 +68,13 @@ export function AdminProductsPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Products</h1>
+        <h1 className="text-xl font-semibold text-ink-900">Products</h1>
         <div className="flex items-center gap-3">
           <select
             aria-label="Filter by category"
             value={categoryFilter}
             onChange={(event) => setCategoryFilter(event.target.value)}
-            className="min-h-11 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
+            className="min-h-11 rounded-md border border-ink-300 bg-white px-3 py-2 text-sm shadow-sm"
           >
             <option value="">All categories</option>
             {categories?.map((category) => (

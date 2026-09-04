@@ -46,13 +46,13 @@ export function EmployeeNewSalePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold text-slate-900">New sale</h1>
+      <h1 className="text-xl font-semibold text-ink-900">New sale</h1>
 
       <Input label="Add a product" placeholder="Search by name…" value={search} onChange={(e) => setSearch(e.target.value)} />
 
       {!products && <LoadingSpinner />}
       {products && fetchedAt === null && (
-        <p className="text-sm text-slate-500">Showing products from this device. Prices and stock may be out of date.</p>
+        <p className="text-sm text-ink-500">Showing products from this device. Prices and stock may be out of date.</p>
       )}
 
       {search && (
@@ -64,15 +64,15 @@ export function EmployeeNewSalePage() {
                   <ZoomableImage
                     src={product.imageUrl}
                     alt=""
-                    className="h-16 w-16 shrink-0 rounded-md border border-slate-200"
+                    className="h-16 w-16 shrink-0 rounded-md border border-ink-200"
                   />
                 ) : (
-                  <div className="h-16 w-16 shrink-0 rounded-md border border-dashed border-slate-200" />
+                  <div className="h-16 w-16 shrink-0 rounded-md border border-dashed border-ink-200" />
                 )}
                 <div>
-                  <p className="font-medium text-slate-900">{product.name}</p>
-                  <p className="text-xs uppercase tracking-wide text-slate-400">{product.categoryName}</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="font-medium text-ink-900">{product.name}</p>
+                  <p className="text-xs uppercase tracking-wide text-ink-400">{product.categoryName}</p>
+                  <p className="text-sm text-ink-500">
                     ${product.basePrice.toFixed(2)} · {product.stockQuantity} in stock
                   </p>
                 </div>
@@ -92,16 +92,16 @@ export function EmployeeNewSalePage() {
       )}
 
       <div>
-        <h2 className="mb-2 text-lg font-semibold text-slate-900">Cart</h2>
-        {items.length === 0 && <p className="text-sm text-slate-500">No items yet. Search above to add products.</p>}
+        <h2 className="mb-2 text-lg font-semibold text-ink-900">Cart</h2>
+        {items.length === 0 && <p className="text-sm text-ink-500">No items yet. Search above to add products.</p>}
         {items.length > 0 && (
           <CartTable items={items} onQuantityChange={updateQuantity} onPriceChange={updateSellingPrice} onRemove={removeItem} />
         )}
       </div>
 
       {items.length > 0 && (
-        <div className="sticky bottom-20 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between text-lg font-semibold text-slate-900">
+        <div className="sticky bottom-20 rounded-lg border border-ink-200 bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between text-lg font-semibold text-ink-900">
             <span>Total</span>
             <span>${total.toFixed(2)}</span>
           </div>
