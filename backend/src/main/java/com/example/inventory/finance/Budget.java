@@ -27,6 +27,14 @@ public class Budget extends BaseEntity {
   @Column(name = "period_start", nullable = false)
   private LocalDate periodStart;
 
+  /**
+   * Explicit end of this budget's period (inclusive), rather than derived purely from periodType -
+   * that derivation can't express a CUSTOM admin-picked range. Computed server-side for
+   * MONTHLY/QUARTERLY/YEARLY, supplied by the admin for CUSTOM.
+   */
+  @Column(name = "period_end", nullable = false)
+  private LocalDate periodEnd;
+
   @Column(nullable = false, precision = 12, scale = 2)
   private BigDecimal amount;
 
@@ -58,6 +66,14 @@ public class Budget extends BaseEntity {
     this.periodStart = periodStart;
   }
 
+  public LocalDate getPeriodEnd() {
+    return periodEnd;
+  }
+
+  public void setPeriodEnd(LocalDate periodEnd) {
+    this.periodEnd = periodEnd;
+  }
+
   public BigDecimal getAmount() {
     return amount;
   }
@@ -72,12 +88,5 @@ public class Budget extends BaseEntity {
 
   public void setCreatedBy(User createdBy) {
     this.createdBy = createdBy;
-  }
-
-  /** Last day of this budget's period (inclusive), used to bound the actual-spend comparison. */
-  public LocalDate periodEndInclusive() {
-    LocalDate exclusiveEnd =
-        periodType == PeriodType.MONTHLY ? periodStart.plusMonths(1) : periodStart.plusYears(1);
-    return exclusiveEnd.minusDays(1);
   }
 }

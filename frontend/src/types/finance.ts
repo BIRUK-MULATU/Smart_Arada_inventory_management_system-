@@ -16,13 +16,14 @@ export interface CreateExpenseRequest {
   incurredOn: string;
 }
 
-export type PeriodType = "MONTHLY" | "YEARLY";
+export type PeriodType = "MONTHLY" | "QUARTERLY" | "YEARLY" | "CUSTOM";
 
 export interface BudgetActual {
   id: string;
   category: string;
   periodType: PeriodType;
   periodStart: string;
+  periodEnd: string;
   budgetAmount: number;
   actualAmount: number;
 }
@@ -31,6 +32,8 @@ export interface CreateBudgetRequest {
   category?: string;
   periodType: PeriodType;
   periodStart: string;
+  /** Required for CUSTOM; ignored (recomputed server-side) for every other period type. */
+  periodEnd?: string;
   amount: number;
 }
 

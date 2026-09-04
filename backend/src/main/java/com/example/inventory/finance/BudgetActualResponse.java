@@ -9,5 +9,6 @@ public record BudgetActualResponse(
     String category,
     PeriodType periodType,
     LocalDate periodStart,
+    LocalDate periodEnd,
     BigDecimal budgetAmount,
     BigDecimal actualAmount) {}

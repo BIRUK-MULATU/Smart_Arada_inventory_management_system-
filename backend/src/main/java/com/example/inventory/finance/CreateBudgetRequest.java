@@ -6,8 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * {@code periodEnd} is required only for CUSTOM; it's ignored (recomputed server-side) for
+ * MONTHLY/QUARTERLY/YEARLY.
+ */
 public record CreateBudgetRequest(
     String category,
     @NotNull PeriodType periodType,
     @NotNull LocalDate periodStart,
+    LocalDate periodEnd,
     @NotNull @DecimalMin(value = "0.00") @Digits(integer = 10, fraction = 2) BigDecimal amount) {}

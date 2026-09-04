@@ -74,6 +74,7 @@ export function AdminFinancePage() {
         category: values.category || undefined,
         periodType: values.periodType,
         periodStart: values.periodStart,
+        periodEnd: values.periodEnd || undefined,
         amount: values.amount,
       });
     } catch (error) {

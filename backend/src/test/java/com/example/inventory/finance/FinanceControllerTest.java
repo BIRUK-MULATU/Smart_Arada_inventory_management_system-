@@ -311,4 +311,131 @@ class FinanceControllerTest extends AbstractIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(0));
   }
+
+  @Test
+  void quarterlyBudgetNormalizesToTheQuarterContainingThePeriodStart() throws Exception {
+    persistUser("admin@example.com", Role.ADMIN, true);
+    String token = loginAndGetToken("admin@example.com", RAW_PASSWORD);
+
+    // May 2026 falls in Q2 (Apr 1 - Jun 30).
+    mockMvc
+        .perform(
+            post("/api/finance/budgets")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"category":"Rent","periodType":"QUARTERLY","periodStart":"2026-05-15","amount":1500.00}
+                    """))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.periodStart").value("2026-04-01"))
+        .andExpect(jsonPath("$.periodEnd").value("2026-06-30"));
+  }
+
+  @Test
+  void customBudgetUsesTheExactRangeGiven() throws Exception {
+    persistUser("admin@example.com", Role.ADMIN, true);
+    String token = loginAndGetToken("admin@example.com", RAW_PASSWORD);
+
+    String created =
+        mockMvc
+            .perform(
+                post("/api/finance/budgets")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"category":"Marketing","periodType":"CUSTOM","periodStart":"2026-01-10",
+                         "periodEnd":"2026-01-24","amount":200.00}
+                        """))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.periodStart").value("2026-01-10"))
+            .andExpect(jsonPath("$.periodEnd").value("2026-01-24"))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(objectMapper.readTree(created).get("periodType").stringValue()).isEqualTo("CUSTOM");
+
+    // An expense inside the custom range is picked up as the actual spend.
+    mockMvc.perform(
+        post("/api/finance/expenses")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(
+                """
+                {"category":"Marketing","description":"Flyers","amount":120.00,"incurredOn":"2026-01-15"}
+                """));
+
+    mockMvc
+        .perform(get("/api/finance/budgets").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].actualAmount").value(120.00));
+  }
+
+  @Test
+  void customBudgetWithoutAPeriodEndIsRejected() throws Exception {
+    persistUser("admin@example.com", Role.ADMIN, true);
+    String token = loginAndGetToken("admin@example.com", RAW_PASSWORD);
+
+    mockMvc
+        .perform(
+            post("/api/finance/budgets")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"category":"Marketing","periodType":"CUSTOM","periodStart":"2026-01-10","amount":200.00}
+                    """))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void customBudgetWithEndBeforeStartIsRejected() throws Exception {
+    persistUser("admin@example.com", Role.ADMIN, true);
+    String token = loginAndGetToken("admin@example.com", RAW_PASSWORD);
+
+    mockMvc
+        .perform(
+            post("/api/finance/budgets")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"category":"Marketing","periodType":"CUSTOM","periodStart":"2026-01-10",
+                     "periodEnd":"2026-01-01","amount":200.00}
+                    """))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void twoCustomBudgetsInTheSameCategoryWithDifferentRangesAreBothAllowed() throws Exception {
+    persistUser("admin@example.com", Role.ADMIN, true);
+    String token = loginAndGetToken("admin@example.com", RAW_PASSWORD);
+
+    mockMvc
+        .perform(
+            post("/api/finance/budgets")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"category":"Marketing","periodType":"CUSTOM","periodStart":"2026-01-01",
+                     "periodEnd":"2026-01-15","amount":100.00}
+                    """))
+        .andExpect(status().isCreated());
+
+    // Same category, same period type, same start date, but a different end date - not a
+    // duplicate scope now that uniqueness includes periodEnd.
+    mockMvc
+        .perform(
+            post("/api/finance/budgets")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"category":"Marketing","periodType":"CUSTOM","periodStart":"2026-01-01",
+                     "periodEnd":"2026-01-31","amount":300.00}
+                    """))
+        .andExpect(status().isCreated());
+  }
 }

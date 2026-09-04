@@ -1,9 +1,11 @@
 package com.example.inventory.finance;
 
+import com.example.inventory.exception.BadRequestException;
 import com.example.inventory.exception.ConflictException;
 import com.example.inventory.exception.ResourceNotFoundException;
 import com.example.inventory.user.User;
 import com.example.inventory.user.UserRepository;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -34,17 +36,18 @@ public class BudgetService {
             .orElseThrow(() -> new ResourceNotFoundException("User not found: " + createdByUserId));
 
     String category = ExpenseService.normalizeCategory(request.category());
-    LocalDate periodStart = normalizePeriodStart(request.periodType(), request.periodStart());
+    Period period = resolvePeriod(request.periodType(), request.periodStart(), request.periodEnd());
 
-    if (budgetRepository.existsByCategoryAndPeriodTypeAndPeriodStart(
-        category, request.periodType(), periodStart)) {
+    if (budgetRepository.existsByCategoryAndPeriodTypeAndPeriodStartAndPeriodEnd(
+        category, request.periodType(), period.start(), period.end())) {
       throw new ConflictException("A budget already exists for " + category + " in that period");
     }
 
     Budget budget = new Budget();
     budget.setCategory(category);
     budget.setPeriodType(request.periodType());
-    budget.setPeriodStart(periodStart);
+    budget.setPeriodStart(period.start());
+    budget.setPeriodEnd(period.end());
     budget.setAmount(request.amount());
     budget.setCreatedBy(createdBy);
 
@@ -52,7 +55,7 @@ public class BudgetService {
   }
 
   @Transactional
-  public BudgetResponse updateBudgetAmount(UUID id, java.math.BigDecimal amount) {
+  public BudgetResponse updateBudgetAmount(UUID id, BigDecimal amount) {
     Budget budget =
         budgetRepository
             .findById(id)
@@ -74,23 +77,52 @@ public class BudgetService {
     return budgetRepository.findAllByOrderByPeriodStartDesc().stream()
         .map(
             budget -> {
-              java.math.BigDecimal actual =
+              BigDecimal actual =
                   expenseRepository.sumAmountByCategoryBetween(
-                      budget.getCategory(), budget.getPeriodStart(), budget.periodEndInclusive());
+                      budget.getCategory(), budget.getPeriodStart(), budget.getPeriodEnd());
               return new BudgetActualResponse(
                   budget.getId(),
                   budget.getCategory(),
                   budget.getPeriodType(),
                   budget.getPeriodStart(),
+                  budget.getPeriodEnd(),
                   budget.getAmount(),
                   actual);
             })
         .toList();
   }
 
-  private LocalDate normalizePeriodStart(PeriodType periodType, LocalDate periodStart) {
-    return periodType == PeriodType.MONTHLY
-        ? periodStart.withDayOfMonth(1)
-        : periodStart.withDayOfYear(1);
+  /**
+   * MONTHLY/QUARTERLY/YEARLY are normalized to the calendar period containing the requested start
+   * date and their end date is always computed server-side (any submitted periodEnd is ignored, so
+   * the two can never disagree). CUSTOM is taken from the request exactly as given.
+   */
+  private Period resolvePeriod(PeriodType periodType, LocalDate periodStart, LocalDate periodEnd) {
+    return switch (periodType) {
+      case MONTHLY -> {
+        LocalDate start = periodStart.withDayOfMonth(1);
+        yield new Period(start, start.plusMonths(1).minusDays(1));
+      }
+      case QUARTERLY -> {
+        int quarterStartMonth = ((periodStart.getMonthValue() - 1) / 3) * 3 + 1;
+        LocalDate start = periodStart.withMonth(quarterStartMonth).withDayOfMonth(1);
+        yield new Period(start, start.plusMonths(3).minusDays(1));
+      }
+      case YEARLY -> {
+        LocalDate start = periodStart.withDayOfYear(1);
+        yield new Period(start, start.plusYears(1).minusDays(1));
+      }
+      case CUSTOM -> {
+        if (periodEnd == null) {
+          throw new BadRequestException("periodEnd is required for a CUSTOM budget period");
+        }
+        if (periodEnd.isBefore(periodStart)) {
+          throw new BadRequestException("periodEnd cannot be before periodStart");
+        }
+        yield new Period(periodStart, periodEnd);
+      }
+    };
   }
+
+  private record Period(LocalDate start, LocalDate end) {}
 }

@@ -1,5 +1,12 @@
 import { Button } from "../../components/Button";
-import type { BudgetActual } from "../../types/finance";
+import type { BudgetActual, PeriodType } from "../../types/finance";
+
+const PERIOD_LABELS: Record<PeriodType, string> = {
+  MONTHLY: "Monthly",
+  QUARTERLY: "Quarterly",
+  YEARLY: "Yearly",
+  CUSTOM: "Custom",
+};
 
 interface BudgetTableProps {
   budgets: BudgetActual[];
@@ -18,7 +25,7 @@ export function BudgetTable({ budgets, onDelete }: BudgetTableProps) {
               <div>
                 <p className="font-medium text-slate-900">{budget.category}</p>
                 <p className="text-xs text-slate-500">
-                  {budget.periodType === "MONTHLY" ? "Monthly" : "Yearly"} · starting {budget.periodStart}
+                  {PERIOD_LABELS[budget.periodType]} · {budget.periodStart} to {budget.periodEnd}
                 </p>
               </div>
               <div className="text-right">
