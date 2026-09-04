@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -23,16 +24,19 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final LoginRateLimitFilter loginRateLimitFilter;
   private final RestAuthenticationEntryPoint authenticationEntryPoint;
   private final RestAccessDeniedHandler accessDeniedHandler;
   private final List<String> allowedOrigins;
 
   public SecurityConfig(
       JwtAuthenticationFilter jwtAuthenticationFilter,
+      LoginRateLimitFilter loginRateLimitFilter,
       RestAuthenticationEntryPoint authenticationEntryPoint,
       RestAccessDeniedHandler accessDeniedHandler,
       @Value("${app.cors.allowed-origins}") List<String> allowedOrigins) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    this.loginRateLimitFilter = loginRateLimitFilter;
     this.authenticationEntryPoint = authenticationEntryPoint;
     this.accessDeniedHandler = accessDeniedHandler;
     this.allowedOrigins = allowedOrigins;
@@ -69,6 +73,19 @@ public class SecurityConfig {
                 exceptions
                     .authenticationEntryPoint(authenticationEntryPoint)
                     .accessDeniedHandler(accessDeniedHandler))
+        // This backend only ever serves JSON and product images, never HTML/JS, so a maximally
+        // strict CSP is safe here - there's nothing on this origin a browser should execute or
+        // frame. TLS/HSTS is the reverse proxy's job (Phase 12), not this app's.
+        .headers(
+            headers ->
+                headers
+                    .contentSecurityPolicy(
+                        csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'"))
+                    .frameOptions(frame -> frame.deny())
+                    .contentTypeOptions(contentTypeOptions -> {})
+                    .referrerPolicy(
+                        referrer ->
+                            referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN)))
         .authorizeHttpRequests(
             authorize ->
                 authorize
@@ -90,7 +107,8 @@ public class SecurityConfig {
                     .hasRole("ADMIN")
                     .anyRequest()
                     .authenticated())
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(loginRateLimitFilter, JwtAuthenticationFilter.class);
 
     return http.build();
   }

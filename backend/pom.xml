@@ -118,6 +118,20 @@
           </execution>
         </executions>
       </plugin>
+      <!-- Not bound to any phase on purpose: a CVE-database scan is slow and needs network
+           access, so it shouldn't block every local build or `./mvnw test`. Run it on demand with
+           `./mvnw org.owasp:dependency-check-maven:check`, e.g. periodically or in CI. -->
+      <plugin>
+        <groupId>org.owasp</groupId>
+        <artifactId>dependency-check-maven</artifactId>
+        <version>13.0.0</version>
+        <configuration>
+          <!-- Free key from https://nvd.nist.gov/developers/request-an-api-key - required by the
+               NVD API for a usable rate limit. Empty is fine when the key isn't set; the goal
+               just fails with a clear message instead of running. -->
+          <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

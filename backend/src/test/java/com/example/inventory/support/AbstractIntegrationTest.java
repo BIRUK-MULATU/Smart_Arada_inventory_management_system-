@@ -47,6 +47,11 @@ public abstract class AbstractIntegrationTest {
     registry.add(
         "app.storage.product-images-dir",
         () -> System.getProperty("java.io.tmpdir") + "/inventory-sales-test-images");
+    // The login rate limiter is a singleton bean shared across the whole cached Spring context,
+    // so every login across every test class in the suite counts against the same window -
+    // loosen it here so it doesn't interfere with legitimate test traffic. LoginRateLimitFilterTest
+    // covers the actual limiting behavior in isolation.
+    registry.add("app.rate-limit.login-max-attempts", () -> "100000");
   }
 
   @Autowired protected MockMvc mockMvc;

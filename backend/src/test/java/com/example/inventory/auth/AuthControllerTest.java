@@ -2,6 +2,7 @@ package com.example.inventory.auth;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,6 +31,28 @@ class AuthControllerTest extends AbstractIntegrationTest {
         .andExpect(jsonPath("$.token").isNotEmpty())
         .andExpect(jsonPath("$.user.email").value("admin@example.com"))
         .andExpect(jsonPath("$.user.role").value("ADMIN"));
+  }
+
+  @Test
+  void responsesCarryHardenedSecurityHeaders() throws Exception {
+    persistUser("admin@example.com", Role.ADMIN, true);
+
+    mockMvc
+        .perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                                        {"email":"admin@example.com","password":"%s"}
+                                        """
+                        .formatted(RAW_PASSWORD)))
+        .andExpect(status().isOk())
+        .andExpect(
+            header()
+                .string("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'"))
+        .andExpect(header().string("X-Frame-Options", "DENY"))
+        .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+        .andExpect(header().string("Referrer-Policy", "same-origin"));
   }
 
   @Test

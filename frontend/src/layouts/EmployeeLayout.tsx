@@ -1,6 +1,8 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { Badge } from "../components/Badge";
 import { OnlineStatusBanner } from "../components/OnlineStatusBanner";
 import { useAuth } from "../features/auth/useAuth";
+import { usePendingSyncCounts } from "../features/sync/usePendingSyncCounts";
 
 const navItems = [
   { to: "/products", label: "Products" },
@@ -11,6 +13,7 @@ const navItems = [
 
 export function EmployeeLayout() {
   const { user, logout } = useAuth();
+  const syncCounts = usePendingSyncCounts();
 
   return (
     <div className="flex min-h-screen flex-col bg-ink-50">
@@ -18,6 +21,16 @@ export function EmployeeLayout() {
         <div>
           <p className="text-sm font-semibold text-gold-400">Inventory &amp; Sales</p>
           <p className="text-xs text-ink-400">{user?.name}</p>
+          {(syncCounts?.pending ?? 0) > 0 || (syncCounts?.failed ?? 0) > 0 ? (
+            <div className="mt-1 flex gap-1">
+              {syncCounts && syncCounts.pending > 0 && (
+                <Badge tone="warning">{syncCounts.pending} pending sync</Badge>
+              )}
+              {syncCounts && syncCounts.failed > 0 && (
+                <Badge tone="danger">{syncCounts.failed} sync failed</Badge>
+              )}
+            </div>
+          ) : null}
         </div>
         <button
           onClick={logout}

@@ -74,6 +74,7 @@ docker compose down -v        # stop and wipe the database volume
 
 cd backend && ./mvnw spring-boot:run     # run the API
 cd backend && ./mvnw test                # backend tests
+cd backend && ./mvnw org.owasp:dependency-check-maven:check   # CVE scan of dependencies (slow, needs network - run periodically/in CI, not on every build)
 
 cd frontend && npm run dev               # vite dev server
 cd frontend && npm run typecheck         # tsc --noEmit
