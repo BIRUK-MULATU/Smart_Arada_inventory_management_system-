@@ -1,9 +1,11 @@
 import Dexie, { type EntityTable } from "dexie";
 import type {
   InventorySnapshotRecord,
+  LocalNote,
   LocalProduct,
   LocalSale,
   LocalSaleItem,
+  NoteSyncQueueEntry,
   SyncMetadataRecord,
   SyncQueueEntry,
 } from "./types";
@@ -15,6 +17,8 @@ export class AppDatabase extends Dexie {
   inventorySnapshot!: EntityTable<InventorySnapshotRecord, "id">;
   syncQueue!: EntityTable<SyncQueueEntry, "id">;
   syncMetadata!: EntityTable<SyncMetadataRecord, "id">;
+  notes!: EntityTable<LocalNote, "id">;
+  noteSyncQueue!: EntityTable<NoteSyncQueueEntry, "id">;
 
   constructor(name = "inventory-sales") {
     super(name);
@@ -37,6 +41,12 @@ export class AppDatabase extends Dexie {
     // best-effort, last-known-good data anyway.
     this.version(2).stores({
       products: "id, name, sku, active, categoryId",
+    });
+
+    // Version 3: private per-user notes, with their own offline queue (Phase 17).
+    this.version(3).stores({
+      notes: "id, updatedAtLocal, syncStatus",
+      noteSyncQueue: "++id, entityId, status, createdAt",
     });
   }
 }

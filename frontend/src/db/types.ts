@@ -1,4 +1,5 @@
 import type { CreateSaleRequest } from "../types/sale";
+import type { UpsertNoteRequest } from "../types/note";
 
 /**
  * PENDING: written locally, not yet attempted.
@@ -75,4 +76,35 @@ export interface SyncQueueEntry {
 export interface SyncMetadataRecord {
   id: "sync";
   lastSyncAttemptAt?: string;
+}
+
+/**
+ * baseUpdatedAt is the server's updatedAt as of the last successful sync - null for a note that
+ * has never synced yet. updatedAtLocal drives sort order and is bumped on every local edit,
+ * independent of whether that edit has synced.
+ */
+export interface LocalNote {
+  id: string;
+  title: string | null;
+  content: string;
+  baseUpdatedAt: string | null;
+  syncStatus: SyncStatus;
+  updatedAtLocal: string;
+}
+
+export type NoteSyncOperationType = "UPSERT_NOTE" | "DELETE_NOTE";
+
+/** A separate queue from the sale sync queue above - notes have their own operations (including
+ * delete) and a different conflict model, so reusing the sales queue's types would mean
+ * shoehorning both into one union for no real benefit. */
+export interface NoteSyncQueueEntry {
+  id?: number;
+  operationType: NoteSyncOperationType;
+  entityId: string;
+  payload: UpsertNoteRequest | null;
+  status: SyncStatus;
+  retryCount: number;
+  lastAttemptAt: string | null;
+  createdAt: string;
+  errorMessage: string | null;
 }

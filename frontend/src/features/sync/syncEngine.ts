@@ -1,6 +1,7 @@
 import { db } from "../../db/db";
 import { extractErrorMessage } from "../../api/errors";
 import { syncApi } from "../../api/syncApi";
+import { drainNoteQueue } from "../notes/noteSync";
 import type { SyncQueueEntry, SyncStatus } from "../../db/types";
 import type { SaleStatus } from "../../types/sale";
 
@@ -88,6 +89,7 @@ export function triggerSync(): void {
     return;
   }
   void drainQueue();
+  void drainNoteQueue();
 }
 
 /** Manually retries one FAILED entry: resets its backoff state and re-queues it as PENDING. */

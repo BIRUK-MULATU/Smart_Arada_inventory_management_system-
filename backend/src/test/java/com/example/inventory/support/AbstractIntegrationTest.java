@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.example.inventory.finance.BudgetRepository;
 import com.example.inventory.finance.ExpenseRepository;
 import com.example.inventory.inventory.InventoryTransactionRepository;
+import com.example.inventory.note.NoteRepository;
 import com.example.inventory.product.Category;
 import com.example.inventory.product.CategoryRepository;
 import com.example.inventory.product.Product;
@@ -64,6 +65,8 @@ public abstract class AbstractIntegrationTest {
 
   @Autowired protected BudgetRepository budgetRepository;
 
+  @Autowired protected NoteRepository noteRepository;
+
   @Autowired protected PasswordEncoder passwordEncoder;
 
   @Autowired protected ObjectMapper objectMapper;
@@ -82,6 +85,7 @@ public abstract class AbstractIntegrationTest {
     categoryRepository.deleteAll();
     expenseRepository.deleteAll();
     budgetRepository.deleteAll();
+    noteRepository.deleteAll();
     userRepository.deleteAll();
     cachedDefaultCategory = null;
   }

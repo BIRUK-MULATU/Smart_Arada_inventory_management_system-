@@ -6,6 +6,7 @@ const navItems = [
   { to: "/products", label: "Products" },
   { to: "/sales/new", label: "New Sale" },
   { to: "/sales", label: "My Sales" },
+  { to: "/notes", label: "Notes" },
 ];
 
 export function EmployeeLayout() {

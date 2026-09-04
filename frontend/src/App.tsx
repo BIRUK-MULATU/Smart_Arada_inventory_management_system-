@@ -27,6 +27,7 @@ const EmployeeNewSalePage = lazy(() => import("./pages/EmployeeNewSalePage").the
 const EmployeeProductsPage = lazy(() =>
   import("./pages/EmployeeProductsPage").then((m) => ({ default: m.EmployeeProductsPage })),
 );
+const NotesPage = lazy(() => import("./pages/NotesPage").then((m) => ({ default: m.NotesPage })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +60,7 @@ function App() {
                     <Route path="/admin/sync" element={<AdminSyncPage />} />
                     <Route path="/admin/finance" element={<AdminFinancePage />} />
                     <Route path="/admin/employees" element={<AdminEmployeesPage />} />
+                    <Route path="/admin/notes" element={<NotesPage />} />
                   </Route>
                 </Route>
 
@@ -67,6 +69,7 @@ function App() {
                     <Route path="/products" element={<EmployeeProductsPage />} />
                     <Route path="/sales/new" element={<EmployeeNewSalePage />} />
                     <Route path="/sales" element={<EmployeeMySalesPage />} />
+                    <Route path="/notes" element={<NotesPage />} />
                   </Route>
                 </Route>
               </Route>
