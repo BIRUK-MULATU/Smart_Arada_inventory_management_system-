@@ -37,6 +37,7 @@ export function AdminProductsPage() {
             imageUrl: values.imageUrl || undefined,
             categoryId: values.categoryId,
             basePrice: values.basePrice,
+            costPrice: values.costPrice,
             lowStockThreshold: values.lowStockThreshold,
             active: values.active,
           },
@@ -48,6 +49,7 @@ export function AdminProductsPage() {
           imageUrl: values.imageUrl || undefined,
           categoryId: values.categoryId,
           basePrice: values.basePrice,
+          costPrice: values.costPrice,
           lowStockThreshold: values.lowStockThreshold,
         });
       }

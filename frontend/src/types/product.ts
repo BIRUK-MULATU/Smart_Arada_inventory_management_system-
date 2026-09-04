@@ -6,6 +6,9 @@ export interface Product {
   categoryId: string;
   categoryName: string;
   basePrice: number;
+  // Admin-only - the server redacts this to null for an EMPLOYEE, so it is never actually present
+  // in a response the employee-facing UI reads.
+  costPrice: number | null;
   stockQuantity: number;
   lowStockThreshold: number;
   lowStock: boolean;
@@ -20,6 +23,7 @@ export interface CreateProductRequest {
   imageUrl?: string;
   categoryId: string;
   basePrice: number;
+  costPrice?: number;
   lowStockThreshold: number;
 }
 
@@ -29,6 +33,7 @@ export interface UpdateProductRequest {
   imageUrl?: string;
   categoryId: string;
   basePrice: number;
+  costPrice?: number;
   lowStockThreshold: number;
   active: boolean;
 }

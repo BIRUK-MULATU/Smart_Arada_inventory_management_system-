@@ -2,6 +2,7 @@ package com.example.inventory.product;
 
 import com.example.inventory.exception.ConflictException;
 import com.example.inventory.exception.ResourceNotFoundException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,7 @@ public class ProductService {
     product.setImageUrl(request.imageUrl());
     product.setCategory(findCategoryOrThrow(request.categoryId()));
     product.setBasePrice(request.basePrice());
+    product.setCostPrice(request.costPrice() != null ? request.costPrice() : BigDecimal.ZERO);
     product.setLowStockThreshold(request.lowStockThreshold());
     product.setActive(true);
 
@@ -70,6 +72,7 @@ public class ProductService {
     product.setImageUrl(request.imageUrl());
     product.setCategory(findCategoryOrThrow(request.categoryId()));
     product.setBasePrice(request.basePrice());
+    product.setCostPrice(request.costPrice() != null ? request.costPrice() : BigDecimal.ZERO);
     product.setLowStockThreshold(request.lowStockThreshold());
     product.setActive(request.active());
 

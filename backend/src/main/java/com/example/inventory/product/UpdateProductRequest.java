@@ -14,5 +14,6 @@ public record UpdateProductRequest(
     String imageUrl,
     @NotNull UUID categoryId,
     @NotNull @DecimalMin(value = "0.00") @Digits(integer = 10, fraction = 2) BigDecimal basePrice,
+    @DecimalMin(value = "0.00") @Digits(integer = 10, fraction = 2) BigDecimal costPrice,
     @NotNull @Min(0) Integer lowStockThreshold,
     @NotNull Boolean active) {}

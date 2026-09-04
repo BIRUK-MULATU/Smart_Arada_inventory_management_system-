@@ -113,6 +113,7 @@ class SaleTransactionExecutor {
       saleItem.setProduct(product);
       saleItem.setQuantity(itemRequest.quantity());
       saleItem.setSellingPrice(itemRequest.sellingPrice());
+      saleItem.setCostPrice(product.getCostPrice());
       saleItem.setSubtotal(subtotal);
       sale.addItem(saleItem);
     }

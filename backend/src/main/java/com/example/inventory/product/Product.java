@@ -28,6 +28,10 @@ public class Product extends BaseEntity {
   @Column(name = "base_price", nullable = false, precision = 12, scale = 2)
   private BigDecimal basePrice;
 
+  /** Cost-of-goods basis, admin-only data - never exposed to an EMPLOYEE via ProductResponse. */
+  @Column(name = "cost_price", nullable = false, precision = 12, scale = 2)
+  private BigDecimal costPrice = BigDecimal.ZERO;
+
   @Column(name = "stock_quantity", nullable = false)
   private int stockQuantity = 0;
 
@@ -75,6 +79,14 @@ public class Product extends BaseEntity {
 
   public void setBasePrice(BigDecimal basePrice) {
     this.basePrice = basePrice;
+  }
+
+  public BigDecimal getCostPrice() {
+    return costPrice;
+  }
+
+  public void setCostPrice(BigDecimal costPrice) {
+    this.costPrice = costPrice;
   }
 
   public int getStockQuantity() {

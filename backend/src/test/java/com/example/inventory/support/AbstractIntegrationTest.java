@@ -2,6 +2,8 @@ package com.example.inventory.support;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+import com.example.inventory.finance.BudgetRepository;
+import com.example.inventory.finance.ExpenseRepository;
 import com.example.inventory.inventory.InventoryTransactionRepository;
 import com.example.inventory.product.Category;
 import com.example.inventory.product.CategoryRepository;
@@ -58,6 +60,10 @@ public abstract class AbstractIntegrationTest {
 
   @Autowired protected SaleRepository saleRepository;
 
+  @Autowired protected ExpenseRepository expenseRepository;
+
+  @Autowired protected BudgetRepository budgetRepository;
+
   @Autowired protected PasswordEncoder passwordEncoder;
 
   @Autowired protected ObjectMapper objectMapper;
@@ -68,11 +74,14 @@ public abstract class AbstractIntegrationTest {
   void cleanDatabase() {
     // inventory_transactions and sales both have RESTRICT foreign keys to products/users, and
     // products has a RESTRICT foreign key to categories, so they must be cleared in this order.
-    // sale_items cascades automatically when its parent sale is deleted.
+    // sale_items cascades automatically when its parent sale is deleted. expenses/budgets both
+    // have a RESTRICT foreign key to users too.
     inventoryTransactionRepository.deleteAll();
     saleRepository.deleteAll();
     productRepository.deleteAll();
     categoryRepository.deleteAll();
+    expenseRepository.deleteAll();
+    budgetRepository.deleteAll();
     userRepository.deleteAll();
     cachedDefaultCategory = null;
   }

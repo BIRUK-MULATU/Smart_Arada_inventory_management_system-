@@ -17,6 +17,7 @@ import { RootRedirect } from "./routes/RootRedirect";
 const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage").then((m) => ({ default: m.AdminDashboardPage })));
 const AdminCategoriesPage = lazy(() => import("./pages/AdminCategoriesPage").then((m) => ({ default: m.AdminCategoriesPage })));
 const AdminEmployeesPage = lazy(() => import("./pages/AdminEmployeesPage").then((m) => ({ default: m.AdminEmployeesPage })));
+const AdminFinancePage = lazy(() => import("./pages/AdminFinancePage").then((m) => ({ default: m.AdminFinancePage })));
 const AdminInventoryPage = lazy(() => import("./pages/AdminInventoryPage").then((m) => ({ default: m.AdminInventoryPage })));
 const AdminProductsPage = lazy(() => import("./pages/AdminProductsPage").then((m) => ({ default: m.AdminProductsPage })));
 const AdminSalesPage = lazy(() => import("./pages/AdminSalesPage").then((m) => ({ default: m.AdminSalesPage })));
@@ -56,6 +57,7 @@ function App() {
                     <Route path="/admin/inventory" element={<AdminInventoryPage />} />
                     <Route path="/admin/sales" element={<AdminSalesPage />} />
                     <Route path="/admin/sync" element={<AdminSyncPage />} />
+                    <Route path="/admin/finance" element={<AdminFinancePage />} />
                     <Route path="/admin/employees" element={<AdminEmployeesPage />} />
                   </Route>
                 </Route>

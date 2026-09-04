@@ -28,6 +28,14 @@ public class SaleItem extends ImmutableEntity {
   @Column(name = "selling_price", nullable = false, precision = 12, scale = 2)
   private BigDecimal sellingPrice;
 
+  /**
+   * The product's cost price at the moment of sale, captured the same way sellingPrice is so profit
+   * stays accurate historically even if a product's cost later changes. Admin-only data -
+   * deliberately never exposed via SaleItemResponse.
+   */
+  @Column(name = "cost_price", nullable = false, precision = 12, scale = 2)
+  private BigDecimal costPrice;
+
   @Column(nullable = false, precision = 12, scale = 2)
   private BigDecimal subtotal;
 
@@ -61,6 +69,14 @@ public class SaleItem extends ImmutableEntity {
 
   public void setSellingPrice(BigDecimal sellingPrice) {
     this.sellingPrice = sellingPrice;
+  }
+
+  public BigDecimal getCostPrice() {
+    return costPrice;
+  }
+
+  public void setCostPrice(BigDecimal costPrice) {
+    this.costPrice = costPrice;
   }
 
   public BigDecimal getSubtotal() {

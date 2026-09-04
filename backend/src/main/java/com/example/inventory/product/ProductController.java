@@ -34,13 +34,20 @@ public class ProductController {
       @RequestParam(defaultValue = "false") boolean includeInactive,
       @RequestParam(required = false) UUID categoryId,
       @AuthenticationPrincipal JwtUserPrincipal principal) {
-    boolean effectiveIncludeInactive = includeInactive && principal.role() == Role.ADMIN;
-    return productService.listProducts(effectiveIncludeInactive, categoryId);
+    boolean isAdmin = principal.role() == Role.ADMIN;
+    boolean effectiveIncludeInactive = includeInactive && isAdmin;
+    List<ProductResponse> products =
+        productService.listProducts(effectiveIncludeInactive, categoryId);
+    return isAdmin
+        ? products
+        : products.stream().map(ProductResponse::withCostPriceRedacted).toList();
   }
 
   @GetMapping("/{id}")
-  public ProductResponse getProduct(@PathVariable UUID id) {
-    return productService.getProduct(id);
+  public ProductResponse getProduct(
+      @PathVariable UUID id, @AuthenticationPrincipal JwtUserPrincipal principal) {
+    ProductResponse product = productService.getProduct(id);
+    return principal.role() == Role.ADMIN ? product : product.withCostPriceRedacted();
   }
 
   @PostMapping

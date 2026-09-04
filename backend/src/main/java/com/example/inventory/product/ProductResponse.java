@@ -12,6 +12,9 @@ public record ProductResponse(
     UUID categoryId,
     String categoryName,
     BigDecimal basePrice,
+    // Admin-only - callers must redact this to null before returning it to an EMPLOYEE. Cost
+    // price is business-sensitive; it is deliberately never included in SaleItemResponse either.
+    BigDecimal costPrice,
     int stockQuantity,
     int lowStockThreshold,
     boolean lowStock,
@@ -28,11 +31,30 @@ public record ProductResponse(
         product.getCategory().getId(),
         product.getCategory().getName(),
         product.getBasePrice(),
+        product.getCostPrice(),
         product.getStockQuantity(),
         product.getLowStockThreshold(),
         product.getStockQuantity() <= product.getLowStockThreshold(),
         product.isActive(),
         product.getCreatedAt(),
         product.getUpdatedAt());
+  }
+
+  public ProductResponse withCostPriceRedacted() {
+    return new ProductResponse(
+        id,
+        name,
+        sku,
+        imageUrl,
+        categoryId,
+        categoryName,
+        basePrice,
+        null,
+        stockQuantity,
+        lowStockThreshold,
+        lowStock,
+        active,
+        createdAt,
+        updatedAt);
   }
 }

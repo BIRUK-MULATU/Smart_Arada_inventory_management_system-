@@ -13,6 +13,7 @@ const productSchema = z.object({
   imageUrl: z.union([z.url("Enter a valid URL"), z.literal("")]).optional(),
   categoryId: z.string().min(1, "Choose a category"),
   basePrice: z.coerce.number().min(0, "Price must be zero or more"),
+  costPrice: z.coerce.number().min(0, "Cost must be zero or more"),
   lowStockThreshold: z.coerce.number().int().min(0, "Threshold must be zero or more"),
   active: z.boolean(),
 });
@@ -44,6 +45,7 @@ export function ProductForm({ product, categories, onSubmit, onCancel }: Product
       imageUrl: product?.imageUrl ?? "",
       categoryId: product?.categoryId ?? "",
       basePrice: product?.basePrice ?? 0,
+      costPrice: product?.costPrice ?? 0,
       lowStockThreshold: product?.lowStockThreshold ?? 0,
       active: product?.active ?? true,
     },
@@ -63,12 +65,20 @@ export function ProductForm({ product, categories, onSubmit, onCancel }: Product
         ))}
       </Select>
       <Input
-        label="Base price"
+        label="Base price (selling price)"
         type="number"
         step="0.01"
         min="0"
         error={errors.basePrice?.message}
         {...register("basePrice")}
+      />
+      <Input
+        label="Cost price (what you paid - used for profit tracking, never shown to employees)"
+        type="number"
+        step="0.01"
+        min="0"
+        error={errors.costPrice?.message}
+        {...register("costPrice")}
       />
       <Input
         label="Low stock threshold"
