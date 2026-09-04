@@ -43,7 +43,7 @@ const TOUCH_MOVE_CANCEL_THRESHOLD_PX = 10;
  * zoom pane while the user is dragging it around - before the hold fires, touches are left alone
  * so normal scrolling/tapping is completely unaffected.
  */
-export function ZoomableImage({ src, alt, className, zoom = 2.5, paneSize = 300 }: ZoomableImageProps) {
+export function ZoomableImage({ src, alt, className, zoom = 3, paneSize = 420 }: ZoomableImageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hovering, setHovering] = useState(false);
   const [lens, setLens] = useState<LensState>({ left: 0, top: 0, size: 0 });
@@ -66,8 +66,12 @@ export function ZoomableImage({ src, alt, className, zoom = 2.5, paneSize = 300 
         size: lensSize,
       });
 
-      const backgroundWidth = rect.width * zoom;
-      const backgroundHeight = rect.height * zoom;
+      // Small thumbnails (h-16, h-20, ...) times `zoom` can end up smaller than the pane itself,
+      // which would leave the zoomed image clamped in a corner instead of panning - so the
+      // effective zoom always overfills the pane by a small margin, whatever the thumbnail size.
+      const effectiveZoom = Math.max(zoom, (paneSize * 1.05) / rect.width, (paneSize * 1.05) / rect.height);
+      const backgroundWidth = rect.width * effectiveZoom;
+      const backgroundHeight = rect.height * effectiveZoom;
       const rawBackgroundLeft = -(fractionX * backgroundWidth - paneSize / 2);
       const rawBackgroundTop = -(fractionY * backgroundHeight - paneSize / 2);
 
