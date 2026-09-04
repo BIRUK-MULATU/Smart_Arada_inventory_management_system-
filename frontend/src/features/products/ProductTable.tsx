@@ -1,5 +1,6 @@
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
+import { ZoomableImage } from "../../components/ZoomableImage";
 import type { Product } from "../../types/product";
 
 interface ProductTableProps {
@@ -31,10 +32,10 @@ export function ProductTable({ products, onEdit, onDeactivate }: ProductTablePro
             <tr key={product.id}>
               <td className="px-4 py-2">
                 {product.imageUrl ? (
-                  <img
+                  <ZoomableImage
                     src={product.imageUrl}
                     alt=""
-                    className="h-16 w-16 rounded-md border border-slate-200 object-cover"
+                    className="h-16 w-16 rounded-md border border-slate-200"
                   />
                 ) : (
                   <div className="h-16 w-16 rounded-md border border-dashed border-slate-200" />

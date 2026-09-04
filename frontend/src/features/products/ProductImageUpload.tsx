@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from "react";
 import { extractErrorMessage } from "../../api/errors";
+import { ZoomableImage } from "../../components/ZoomableImage";
 import type { Product } from "../../types/product";
 import { useRemoveProductImage, useUploadProductImage } from "./useProducts";
 
@@ -44,10 +45,10 @@ export function ProductImageUpload({ product, onUpdated }: ProductImageUploadPro
       <span className="text-sm font-medium text-slate-700">Photo</span>
       <div className="flex flex-col items-center gap-3">
         {product.imageUrl ? (
-          <img
+          <ZoomableImage
             src={product.imageUrl}
             alt={product.name}
-            className="h-48 w-48 rounded-lg border border-slate-200 object-cover"
+            className="h-48 w-48 rounded-lg border border-slate-200"
           />
         ) : (
           <div className="flex h-48 w-48 items-center justify-center rounded-lg border border-dashed border-slate-300 text-center text-sm text-slate-400">

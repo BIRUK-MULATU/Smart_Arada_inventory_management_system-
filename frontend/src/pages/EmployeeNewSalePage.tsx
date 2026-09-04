@@ -5,6 +5,7 @@ import { Card } from "../components/Card";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { Input } from "../components/Input";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import { ZoomableImage } from "../components/ZoomableImage";
 import { CartTable } from "../features/sales/CartTable";
 import { useCart } from "../features/sales/useCart";
 import { recordSaleOffline } from "../features/sales/offlineSales";
@@ -60,10 +61,10 @@ export function EmployeeNewSalePage() {
             <Card key={product.id} className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 {product.imageUrl ? (
-                  <img
+                  <ZoomableImage
                     src={product.imageUrl}
                     alt=""
-                    className="h-16 w-16 shrink-0 rounded-md border border-slate-200 object-cover"
+                    className="h-16 w-16 shrink-0 rounded-md border border-slate-200"
                   />
                 ) : (
                   <div className="h-16 w-16 shrink-0 rounded-md border border-dashed border-slate-200" />
