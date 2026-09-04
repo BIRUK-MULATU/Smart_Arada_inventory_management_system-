@@ -46,9 +46,13 @@ export function ProductForm({ product, categories, onSubmit, onCancel }: Product
       sku: product?.sku ?? "",
       imageUrl: product?.imageUrl ?? "",
       categoryId: product?.categoryId ?? "",
-      basePrice: product?.basePrice ?? 0,
-      costPrice: product?.costPrice ?? 0,
-      lowStockThreshold: product?.lowStockThreshold ?? 0,
+      // Empty, not 0: a number input pre-filled with the literal digit "0" means the user's
+      // first keystroke lands after it rather than replacing it - typing "3444" becomes "03444"
+      // instead of "3444". Leaving it blank on create avoids that; editing an existing product
+      // still shows its real value above.
+      basePrice: product?.basePrice ?? "",
+      costPrice: product?.costPrice ?? "",
+      lowStockThreshold: product?.lowStockThreshold ?? "",
       active: product?.active ?? true,
     },
   });

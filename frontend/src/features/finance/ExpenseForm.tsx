@@ -28,12 +28,12 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<ExpenseFormInput, unknown, ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
-    defaultValues: { category: "", description: "", amount: 0, incurredOn: today() },
+    defaultValues: { category: "", description: "", amount: "", incurredOn: today() },
   });
 
   const submit = async (values: ExpenseFormValues) => {
     await onSubmit(values);
-    reset({ category: "", description: "", amount: 0, incurredOn: today() });
+    reset({ category: "", description: "", amount: "", incurredOn: today() });
   };
 
   return (

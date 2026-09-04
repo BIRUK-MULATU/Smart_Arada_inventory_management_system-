@@ -40,7 +40,7 @@ export function BudgetForm({ onSubmit }: BudgetFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<BudgetFormInput, unknown, BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
-    defaultValues: { category: "", periodType: "MONTHLY", periodStart: today(), periodEnd: "", amount: 0 },
+    defaultValues: { category: "", periodType: "MONTHLY", periodStart: today(), periodEnd: "", amount: "" },
   });
 
   const periodType = useWatch({ control, name: "periodType" });
@@ -48,7 +48,7 @@ export function BudgetForm({ onSubmit }: BudgetFormProps) {
 
   const submit = async (values: BudgetFormValues) => {
     await onSubmit(values);
-    reset({ category: "", periodType: "MONTHLY", periodStart: today(), periodEnd: "", amount: 0 });
+    reset({ category: "", periodType: "MONTHLY", periodStart: today(), periodEnd: "", amount: "" });
   };
 
   return (

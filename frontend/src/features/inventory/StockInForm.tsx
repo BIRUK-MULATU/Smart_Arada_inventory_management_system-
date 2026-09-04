@@ -30,7 +30,7 @@ export function StockInForm({ products, onSubmit, onCancel }: StockInFormProps) 
     formState: { errors, isSubmitting },
   } = useForm<StockInFormInput, unknown, StockInFormValues>({
     resolver: zodResolver(stockInSchema),
-    defaultValues: { productId: "", quantity: 1, reason: "" },
+    defaultValues: { productId: "", quantity: "", reason: "" },
   });
 
   return (
