@@ -1,10 +1,13 @@
 import { db } from "../../db/db";
-import type { CreateSaleRequest } from "../../types/sale";
+import type { CreateSaleRequest, PaymentMethod } from "../../types/sale";
 import type { CartItem } from "./useCart";
 
 export interface RecordSaleInput {
   employeeId: string;
   items: CartItem[];
+  paymentMethod: PaymentMethod;
+  /** Only meaningful (and required by the caller) when paymentMethod is "BANK". */
+  bankAccount?: string;
 }
 
 /**
@@ -28,6 +31,8 @@ export async function recordSaleOffline(input: RecordSaleInput): Promise<string>
       quantity: item.quantity,
       sellingPrice: item.sellingPrice,
     })),
+    paymentMethod: input.paymentMethod,
+    ...(input.paymentMethod === "BANK" ? { bankAccount: input.bankAccount } : {}),
   };
 
   await db.transaction("rw", db.sales, db.saleItems, db.syncQueue, async () => {
@@ -35,6 +40,8 @@ export async function recordSaleOffline(input: RecordSaleInput): Promise<string>
       clientTransactionId,
       employeeId: input.employeeId,
       totalAmount,
+      paymentMethod: input.paymentMethod,
+      bankAccount: input.paymentMethod === "BANK" ? (input.bankAccount ?? null) : null,
       syncStatus: "PENDING",
       createdAt,
     });

@@ -110,7 +110,7 @@ class FinanceControllerTest extends AbstractIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(
                 """
-                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":2,"sellingPrice":10.00}]}
+                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":2,"sellingPrice":10.00}],"paymentMethod":"CASH"}
                 """
                     .formatted(UUID.randomUUID(), product.getId())));
 

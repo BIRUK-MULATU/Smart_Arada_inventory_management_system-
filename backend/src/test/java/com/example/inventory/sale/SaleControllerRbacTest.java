@@ -27,7 +27,8 @@ class SaleControllerRbacTest extends AbstractIntegrationTest {
   private static String saleBody(
       UUID clientTransactionId, UUID productId, int quantity, String sellingPrice) {
     return """
-                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":%d,"sellingPrice":%s}]}
+                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":%d,"sellingPrice":%s}],
+                 "paymentMethod":"CASH"}
                 """
         .formatted(clientTransactionId, productId, quantity, sellingPrice);
   }
@@ -52,6 +53,96 @@ class SaleControllerRbacTest extends AbstractIntegrationTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.totalAmount").value(19.98))
         .andExpect(jsonPath("$.items.length()").value(1));
+  }
+
+  @Test
+  void cashSaleHasNoBankAccount() throws Exception {
+    persistUser("employee@example.com", Role.EMPLOYEE, true);
+    String token = loginAndGetToken("employee@example.com", RAW_PASSWORD);
+    var product = persistProduct("Widget", "WIDGET-1", 10, true);
+
+    mockMvc
+        .perform(
+            postSale(UUID.randomUUID(), product.getId(), 2)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.paymentMethod").value("CASH"))
+        .andExpect(jsonPath("$.bankAccount").doesNotExist());
+  }
+
+  @Test
+  void bankSaleWithoutAnAccountIsRejected() throws Exception {
+    persistUser("employee@example.com", Role.EMPLOYEE, true);
+    String token = loginAndGetToken("employee@example.com", RAW_PASSWORD);
+    var product = persistProduct("Widget", "WIDGET-1", 10, true);
+
+    mockMvc
+        .perform(
+            post("/api/sales")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":1,"sellingPrice":9.99}],
+                     "paymentMethod":"BANK"}
+                    """
+                        .formatted(UUID.randomUUID(), product.getId())))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void bankSaleWithAnAccountSucceedsAndTheAccountIsVisibleToTheAdmin() throws Exception {
+    persistUser("employee@example.com", Role.EMPLOYEE, true);
+    persistUser("admin@example.com", Role.ADMIN, true);
+    String employeeToken = loginAndGetToken("employee@example.com", RAW_PASSWORD);
+    String adminToken = loginAndGetToken("admin@example.com", RAW_PASSWORD);
+    var product = persistProduct("Widget", "WIDGET-1", 10, true);
+
+    String created =
+        mockMvc
+            .perform(
+                post("/api/sales")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + employeeToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":1,"sellingPrice":9.99}],
+                         "paymentMethod":"BANK","bankAccount":"CBE - 1000234567"}
+                        """
+                            .formatted(UUID.randomUUID(), product.getId())))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.paymentMethod").value("BANK"))
+            .andExpect(jsonPath("$.bankAccount").value("CBE - 1000234567"))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String saleId = objectMapper.readTree(created).get("id").stringValue();
+
+    mockMvc
+        .perform(
+            get("/api/sales/" + saleId).header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.paymentMethod").value("BANK"))
+        .andExpect(jsonPath("$.bankAccount").value("CBE - 1000234567"));
+  }
+
+  @Test
+  void missingPaymentMethodIsRejected() throws Exception {
+    persistUser("employee@example.com", Role.EMPLOYEE, true);
+    String token = loginAndGetToken("employee@example.com", RAW_PASSWORD);
+    var product = persistProduct("Widget", "WIDGET-1", 10, true);
+
+    mockMvc
+        .perform(
+            post("/api/sales")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":1,"sellingPrice":9.99}]}
+                    """
+                        .formatted(UUID.randomUUID(), product.getId())))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -343,7 +434,7 @@ class SaleControllerRbacTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                                        {"clientTransactionId":"%s","items":[]}
+                                        {"clientTransactionId":"%s","items":[],"paymentMethod":"CASH"}
                                         """
                         .formatted(UUID.randomUUID())))
         .andExpect(status().isBadRequest());
@@ -365,7 +456,7 @@ class SaleControllerRbacTest extends AbstractIntegrationTest {
                                         {"clientTransactionId":"%s","items":[
                                           {"productId":"%s","quantity":1,"sellingPrice":9.99},
                                           {"productId":"%s","quantity":1,"sellingPrice":9.99}
-                                        ]}
+                                        ],"paymentMethod":"CASH"}
                                         """
                         .formatted(UUID.randomUUID(), product.getId(), product.getId())))
         .andExpect(status().isBadRequest());
@@ -388,7 +479,7 @@ class SaleControllerRbacTest extends AbstractIntegrationTest {
                                         {"clientTransactionId":"%s","items":[
                                           {"productId":"%s","quantity":2,"sellingPrice":5.00},
                                           {"productId":"%s","quantity":3,"sellingPrice":2.50}
-                                        ]}
+                                        ],"paymentMethod":"CASH"}
                                         """
                         .formatted(UUID.randomUUID(), productA.getId(), productB.getId())))
         .andExpect(status().isCreated())

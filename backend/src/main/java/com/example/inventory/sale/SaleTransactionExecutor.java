@@ -64,6 +64,11 @@ class SaleTransactionExecutor {
       }
     }
 
+    if (request.paymentMethod() == PaymentMethod.BANK
+        && (request.bankAccount() == null || request.bankAccount().isBlank())) {
+      throw new BadRequestException("Bank account is required when payment method is Bank");
+    }
+
     // Lock products in a fixed order (sorted by id) across every concurrent sale, regardless
     // of the order they appear in the request, so two sales that touch the same two products
     // can never deadlock waiting on each other's lock.
@@ -101,6 +106,9 @@ class SaleTransactionExecutor {
     sale.setId(UUID.randomUUID());
     sale.setEmployee(employee);
     sale.setClientTransactionId(request.clientTransactionId());
+    sale.setPaymentMethod(request.paymentMethod());
+    sale.setBankAccount(
+        request.paymentMethod() == PaymentMethod.BANK ? request.bankAccount() : null);
 
     BigDecimal totalAmount = BigDecimal.ZERO;
     for (CreateSaleItemRequest itemRequest : request.items()) {

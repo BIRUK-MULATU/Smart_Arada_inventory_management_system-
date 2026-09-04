@@ -1,4 +1,4 @@
-import type { CreateSaleRequest } from "../types/sale";
+import type { CreateSaleRequest, PaymentMethod } from "../types/sale";
 import type { UpsertNoteRequest } from "../types/note";
 
 /**
@@ -31,6 +31,8 @@ export interface LocalSale {
   clientTransactionId: string;
   employeeId: string;
   totalAmount: number;
+  paymentMethod: PaymentMethod;
+  bankAccount: string | null;
   syncStatus: SyncStatus;
   createdAt: string;
 }

@@ -28,7 +28,8 @@ class SyncControllerTest extends AbstractIntegrationTest {
   private static String saleBody(
       UUID clientTransactionId, UUID productId, int quantity, String sellingPrice) {
     return """
-                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":%d,"sellingPrice":%s}]}
+                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":%d,"sellingPrice":%s}],
+                 "paymentMethod":"CASH"}
                 """
         .formatted(clientTransactionId, productId, quantity, sellingPrice);
   }
@@ -38,6 +39,48 @@ class SyncControllerTest extends AbstractIntegrationTest {
     return post("/api/sync/sales")
         .contentType(MediaType.APPLICATION_JSON)
         .content(saleBody(clientTransactionId, productId, quantity, "9.99"));
+  }
+
+  @Test
+  void offlineBankSaleWithoutAnAccountIsRejected() throws Exception {
+    persistUser("employee@example.com", Role.EMPLOYEE, true);
+    String token = loginAndGetToken("employee@example.com", RAW_PASSWORD);
+    var product = persistProduct("Widget", "WIDGET-1", 10, true);
+
+    mockMvc
+        .perform(
+            post("/api/sync/sales")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":1,"sellingPrice":9.99}],
+                     "paymentMethod":"BANK"}
+                    """
+                        .formatted(UUID.randomUUID(), product.getId())))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void offlineBankSaleWithAnAccountSyncsSuccessfully() throws Exception {
+    persistUser("employee@example.com", Role.EMPLOYEE, true);
+    String token = loginAndGetToken("employee@example.com", RAW_PASSWORD);
+    var product = persistProduct("Widget", "WIDGET-1", 10, true);
+
+    mockMvc
+        .perform(
+            post("/api/sync/sales")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":1,"sellingPrice":9.99}],
+                     "paymentMethod":"BANK","bankAccount":"Awash Bank - 013456789"}
+                    """
+                        .formatted(UUID.randomUUID(), product.getId())))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.paymentMethod").value("BANK"))
+        .andExpect(jsonPath("$.bankAccount").value("Awash Bank - 013456789"));
   }
 
   @Test

@@ -12,6 +12,7 @@ import { recordSaleOffline } from "../features/sales/offlineSales";
 import { useOfflineProducts } from "../features/products/useOfflineProducts";
 import { triggerSync } from "../features/sync/syncEngine";
 import { useAuth } from "../features/auth/useAuth";
+import type { PaymentMethod } from "../types/sale";
 
 export function EmployeeNewSalePage() {
   const { products, fetchedAt } = useOfflineProducts();
@@ -19,21 +20,33 @@ export function EmployeeNewSalePage() {
   const { items, addProduct, removeItem, updateQuantity, updateSellingPrice, clear, total } = useCart();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
+  const [bankAccount, setBankAccount] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filtered = products?.filter((product) => product.name.toLowerCase().includes(search.toLowerCase()));
   const hasInvalidQuantityItem = items.some((item) => item.quantity < 1);
   const hasOverStockItem = items.some((item) => item.quantity > item.availableStock);
+  const bankAccountMissing = paymentMethod === "BANK" && !bankAccount.trim();
 
   const handleSubmit = async () => {
     if (!user) {
       return;
     }
+    if (bankAccountMissing) {
+      setSubmitError("Enter the bank account the payment was received into.");
+      return;
+    }
     setSubmitError(null);
     setIsSubmitting(true);
     try {
-      await recordSaleOffline({ employeeId: user.id, items });
+      await recordSaleOffline({
+        employeeId: user.id,
+        items,
+        paymentMethod,
+        bankAccount: paymentMethod === "BANK" ? bankAccount.trim() : undefined,
+      });
       clear();
       triggerSync();
       navigate("/sales");
@@ -105,6 +118,41 @@ export function EmployeeNewSalePage() {
             <span>Total</span>
             <span>${total.toFixed(2)}</span>
           </div>
+
+          <div className="mt-3">
+            <p className="text-sm font-medium text-ink-700">Payment method</p>
+            <div className="mt-1 flex rounded-md border border-ink-300 text-sm">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("CASH")}
+                className={`min-h-11 flex-1 font-medium transition-colors duration-150 ${
+                  paymentMethod === "CASH" ? "bg-ink-950 text-gold-400" : "bg-white text-ink-700 hover:bg-ink-50"
+                }`}
+              >
+                Cash
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("BANK")}
+                className={`min-h-11 flex-1 border-l border-ink-300 font-medium transition-colors duration-150 ${
+                  paymentMethod === "BANK" ? "bg-ink-950 text-gold-400" : "bg-white text-ink-700 hover:bg-ink-50"
+                }`}
+              >
+                Bank account
+              </button>
+            </div>
+            {paymentMethod === "BANK" && (
+              <div className="mt-2">
+                <Input
+                  label="Bank account received into"
+                  placeholder="e.g. CBE - 1000234567"
+                  value={bankAccount}
+                  onChange={(e) => setBankAccount(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+
           {hasOverStockItem && (
             <p className="mt-2 text-sm text-amber-700">
               One or more items exceed the last known stock count. The sale will still be saved and reviewed if stock is short.
@@ -115,7 +163,11 @@ export function EmployeeNewSalePage() {
               <ErrorMessage message={submitError} />
             </div>
           )}
-          <Button className="mt-3 w-full" onClick={handleSubmit} disabled={isSubmitting || hasInvalidQuantityItem}>
+          <Button
+            className="mt-3 w-full"
+            onClick={handleSubmit}
+            disabled={isSubmitting || hasInvalidQuantityItem || bankAccountMissing}
+          >
             {isSubmitting ? "Saving…" : "Complete sale"}
           </Button>
         </div>

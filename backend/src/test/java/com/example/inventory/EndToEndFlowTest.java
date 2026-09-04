@@ -119,7 +119,7 @@ class EndToEndFlowTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                    {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":4,"sellingPrice":15.00}]}
+                    {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":4,"sellingPrice":15.00}],"paymentMethod":"CASH"}
                     """
                         .formatted(UUID.randomUUID(), productId)))
         .andExpect(status().isCreated())
@@ -161,7 +161,7 @@ class EndToEndFlowTest extends AbstractIntegrationTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
-                        {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":2,"sellingPrice":15.00}]}
+                        {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":2,"sellingPrice":15.00}],"paymentMethod":"CASH"}
                         """
                             .formatted(offlineClientTransactionId, productId)))
             .andExpect(status().isCreated())
@@ -183,7 +183,7 @@ class EndToEndFlowTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                    {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":2,"sellingPrice":15.00}]}
+                    {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":2,"sellingPrice":15.00}],"paymentMethod":"CASH"}
                     """
                         .formatted(offlineClientTransactionId, productId)))
         .andExpect(status().isOk())

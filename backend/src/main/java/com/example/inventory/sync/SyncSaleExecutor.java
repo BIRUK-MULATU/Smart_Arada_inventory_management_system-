@@ -9,6 +9,7 @@ import com.example.inventory.product.Product;
 import com.example.inventory.product.ProductRepository;
 import com.example.inventory.sale.CreateSaleItemRequest;
 import com.example.inventory.sale.CreateSaleRequest;
+import com.example.inventory.sale.PaymentMethod;
 import com.example.inventory.sale.Sale;
 import com.example.inventory.sale.SaleItem;
 import com.example.inventory.sale.SaleRepository;
@@ -73,6 +74,11 @@ class SyncSaleExecutor {
       }
     }
 
+    if (request.paymentMethod() == PaymentMethod.BANK
+        && (request.bankAccount() == null || request.bankAccount().isBlank())) {
+      throw new BadRequestException("Bank account is required when payment method is Bank");
+    }
+
     // Lock products in a fixed order, same as the online path, so a sync and an online sale (or
     // two syncs) touching the same products can never deadlock waiting on each other's lock.
     Map<UUID, Product> lockedProducts = new LinkedHashMap<>();
@@ -103,6 +109,9 @@ class SyncSaleExecutor {
     sale.setId(UUID.randomUUID());
     sale.setEmployee(employee);
     sale.setClientTransactionId(request.clientTransactionId());
+    sale.setPaymentMethod(request.paymentMethod());
+    sale.setBankAccount(
+        request.paymentMethod() == PaymentMethod.BANK ? request.bankAccount() : null);
     sale.setStatus(anyShortfall ? SaleStatus.CONFLICT : SaleStatus.COMPLETED);
 
     BigDecimal totalAmount = BigDecimal.ZERO;

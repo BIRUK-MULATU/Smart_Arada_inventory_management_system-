@@ -34,6 +34,14 @@ public class Sale extends BaseEntity {
   private BigDecimal totalAmount;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "payment_method", nullable = false)
+  private PaymentMethod paymentMethod = PaymentMethod.CASH;
+
+  /** Only ever set when paymentMethod is BANK - the account the employee received payment into. */
+  @Column(name = "bank_account")
+  private String bankAccount;
+
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private SaleStatus status = SaleStatus.COMPLETED;
 
@@ -73,6 +81,22 @@ public class Sale extends BaseEntity {
 
   public void setTotalAmount(BigDecimal totalAmount) {
     this.totalAmount = totalAmount;
+  }
+
+  public PaymentMethod getPaymentMethod() {
+    return paymentMethod;
+  }
+
+  public void setPaymentMethod(PaymentMethod paymentMethod) {
+    this.paymentMethod = paymentMethod;
+  }
+
+  public String getBankAccount() {
+    return bankAccount;
+  }
+
+  public void setBankAccount(String bankAccount) {
+    this.bankAccount = bankAccount;
   }
 
   public List<SaleItem> getItems() {

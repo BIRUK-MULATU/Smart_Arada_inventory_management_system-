@@ -87,7 +87,7 @@ class DashboardControllerTest extends AbstractIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(
                 """
-                                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":%d,"sellingPrice":%s}]}
+                                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":%d,"sellingPrice":%s}],"paymentMethod":"CASH"}
                                 """
                     .formatted(UUID.randomUUID(), productId, quantity, sellingPrice)));
   }
@@ -100,7 +100,7 @@ class DashboardControllerTest extends AbstractIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(
                 """
-                                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":%d,"sellingPrice":%s}]}
+                                {"clientTransactionId":"%s","items":[{"productId":"%s","quantity":%d,"sellingPrice":%s}],"paymentMethod":"CASH"}
                                 """
                     .formatted(UUID.randomUUID(), productId, quantity, sellingPrice)));
   }

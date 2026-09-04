@@ -22,6 +22,7 @@ export function SalesTable({ sales, showEmployee }: { sales: Sale[]; showEmploye
             {showEmployee && <th className="px-4 py-2 text-left font-medium text-ink-600">Employee</th>}
             <th className="px-4 py-2 text-left font-medium text-ink-600">Items</th>
             <th className="px-4 py-2 text-right font-medium text-ink-600">Total</th>
+            <th className="px-4 py-2 text-left font-medium text-ink-600">Payment</th>
             <th className="px-4 py-2 text-left font-medium text-ink-600">When</th>
             <th className="px-4 py-2 text-left font-medium text-ink-600">Status</th>
           </tr>
@@ -34,6 +35,16 @@ export function SalesTable({ sales, showEmployee }: { sales: Sale[]; showEmploye
                 {sale.items.map((item) => `${item.productName} ×${item.quantity}`).join(", ")}
               </td>
               <td className="px-4 py-2 text-right font-medium text-ink-900">${sale.totalAmount.toFixed(2)}</td>
+              <td className="px-4 py-2 text-ink-600">
+                {sale.paymentMethod === "BANK" ? (
+                  <>
+                    Bank
+                    {sale.bankAccount && <span className="block text-xs text-ink-400">{sale.bankAccount}</span>}
+                  </>
+                ) : (
+                  "Cash"
+                )}
+              </td>
               <td className="px-4 py-2 text-ink-500">{new Date(sale.createdAt).toLocaleString()}</td>
               <td className="px-4 py-2">
                 <Badge tone={statusTone[sale.status]}>{statusLabel[sale.status]}</Badge>
