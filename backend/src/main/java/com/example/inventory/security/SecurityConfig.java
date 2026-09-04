@@ -91,6 +91,10 @@ public class SecurityConfig {
                 authorize
                     .requestMatchers("/api/auth/login")
                     .permitAll()
+                    // Only reports UP/DOWN (default show-details: never) - safe to leave
+                    // unauthenticated so the Docker healthcheck can call it directly.
+                    .requestMatchers("/actuator/health")
+                    .permitAll()
                     // Product photos are rendered in plain <img> tags, which never send an
                     // Authorization header, and aren't sensitive data - only the read is public;
                     // uploading/deleting one still requires ADMIN (enforced by @PreAuthorize on

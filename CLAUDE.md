@@ -82,3 +82,19 @@ cd frontend && npm test                  # frontend tests
 ```
 
 Backend: http://localhost:8080 · Frontend: http://localhost:5173
+
+## Production (Phase 12)
+
+Self-hosted VPS, Docker Compose, Caddy reverse proxy with automatic TLS, local-disk
+`pg_dump` backups. Full runbook: `docs/DEPLOYMENT.md`.
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build   # build and start the full stack
+docker compose -f docker-compose.prod.yml ps               # check container health
+docker compose -f docker-compose.prod.yml logs -f backend  # tail one service's logs
+docker compose -f docker-compose.prod.yml down             # stop (keeps volumes/data)
+```
+
+`docker-compose.yml` (no `-f` flag) stays local-dev-only — just Postgres, for
+`./mvnw spring-boot:run` / `npm run dev` against. The production stack (`db`,
+`backend`, `frontend`, `caddy`, `backup`) only exists in `docker-compose.prod.yml`.

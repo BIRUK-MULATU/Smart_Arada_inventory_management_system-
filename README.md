@@ -20,9 +20,11 @@ See `CLAUDE.md` for architecture rules and `docs/` for the full specification.
 
 ## Status
 
-Phase 1 complete — backend (Spring Boot) and frontend (Vite/React) scaffolds
-build, boot, and pass their smoke tests. No domain features yet (products,
-sales, inventory, auth, sync land in later phases).
+All 12 phases complete: auth/RBAC, product/inventory/sales domain logic,
+admin dashboard and finance analytics, offline sync with idempotent retries
+and conflict resolution, security hardening (rate limiting, CSP headers,
+dependency scanning), and a production Docker Compose deployment with
+backups and health monitoring. See `docs/DEPLOYMENT.md` to deploy.
 
 ## Repository layout
 
@@ -31,7 +33,8 @@ backend/    Java 21 + Spring Boot 4.1 + Maven, package-by-feature under
             com.example.inventory (config, security, auth, user, product,
             inventory, sale, sync, dashboard, exception, common)
 frontend/   React + TypeScript + Vite + Tailwind CSS
-docs/       Project specification (source of truth)
+deploy/     Caddyfile and backup script for the production stack
+docs/       Project specification (source of truth) and DEPLOYMENT.md
 ```
 
 ## Local development
@@ -48,4 +51,15 @@ cd frontend && npm run dev               # dev server on http://localhost:5173
 cd frontend && npm run typecheck          # tsc --noEmit
 cd frontend && npm run lint                # ESLint
 cd frontend && npm test                     # Vitest
+```
+
+## Production deployment
+
+Self-hosted VPS via Docker Compose, with Caddy handling TLS and reverse
+proxying, and scheduled `pg_dump` backups. Full steps in
+`docs/DEPLOYMENT.md`; quick reference:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml ps
 ```
