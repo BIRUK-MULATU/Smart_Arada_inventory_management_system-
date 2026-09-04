@@ -22,6 +22,7 @@ export function ProductTable({ products, onEdit, onDeactivate }: ProductTablePro
             <th className="px-4 py-2 text-left font-medium text-ink-600">Category</th>
             <th className="px-4 py-2 text-left font-medium text-ink-600">SKU</th>
             <th className="px-4 py-2 text-right font-medium text-ink-600">Base price</th>
+            <th className="px-4 py-2 text-right font-medium text-ink-600">Wholesale price</th>
             <th className="px-4 py-2 text-right font-medium text-ink-600">Stock</th>
             <th className="px-4 py-2 text-left font-medium text-ink-600">Status</th>
             {showActions && <th className="px-4 py-2" />}
@@ -45,6 +46,9 @@ export function ProductTable({ products, onEdit, onDeactivate }: ProductTablePro
               <td className="px-4 py-2 text-ink-600">{product.categoryName}</td>
               <td className="px-4 py-2 text-ink-600">{product.sku ?? "—"}</td>
               <td className="px-4 py-2 text-right text-ink-600">${product.basePrice.toFixed(2)}</td>
+              <td className="px-4 py-2 text-right text-ink-600">
+                {product.costPrice !== null ? `$${product.costPrice.toFixed(2)}` : "—"}
+              </td>
               <td className="px-4 py-2 text-right text-ink-600">{product.stockQuantity}</td>
               <td className="px-4 py-2">
                 <div className="flex flex-wrap gap-1">

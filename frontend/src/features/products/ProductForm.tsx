@@ -83,7 +83,7 @@ export function ProductForm({ product, categories, onSubmit, onCancel }: Product
         {...register("basePrice")}
       />
       <Input
-        label="Cost price (what you paid - used for profit tracking, never shown to employees)"
+        label="Wholesale price (what you paid the supplier - used for profit tracking, never shown to employees)"
         type="number"
         step="0.01"
         min="0"
