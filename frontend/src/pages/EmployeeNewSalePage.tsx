@@ -68,9 +68,11 @@ export function EmployeeNewSalePage() {
         <p className="text-sm text-ink-500">Showing products from this device. Prices and stock may be out of date.</p>
       )}
 
-      {search && (
+      {products && filtered && filtered.length === 0 && <p className="text-sm text-ink-500">No products found.</p>}
+
+      {filtered && filtered.length > 0 && (
         <div className="flex flex-col gap-2">
-          {filtered?.map((product) => (
+          {filtered.map((product) => (
             <Card key={product.id} className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 {product.imageUrl ? (
@@ -106,7 +108,7 @@ export function EmployeeNewSalePage() {
 
       <div>
         <h2 className="mb-2 text-lg font-semibold text-ink-900">Cart</h2>
-        {items.length === 0 && <p className="text-sm text-ink-500">No items yet. Search above to add products.</p>}
+        {items.length === 0 && <p className="text-sm text-ink-500">No items yet. Add products from the list above.</p>}
         {items.length > 0 && (
           <CartTable items={items} onQuantityChange={updateQuantity} onPriceChange={updateSellingPrice} onRemove={removeItem} />
         )}
