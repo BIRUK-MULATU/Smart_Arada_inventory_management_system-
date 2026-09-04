@@ -57,28 +57,28 @@ export function EmployeeProductsPage() {
       )}
       {filtered && filtered.length === 0 && <EmptyState message="No products found." />}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {filtered?.map((product) => (
-          <Card key={product.id} className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              {product.imageUrl ? (
-                <ZoomableImage
-                  src={product.imageUrl}
-                  alt=""
-                  className="h-20 w-20 shrink-0 rounded-md border border-ink-200"
-                />
-              ) : (
-                <div className="h-20 w-20 shrink-0 rounded-md border border-dashed border-ink-200" />
-              )}
-              <div>
-                <p className="font-medium text-ink-900">{product.name}</p>
-                <p className="text-xs uppercase tracking-wide text-ink-400">{product.categoryName}</p>
-                <p className="text-sm text-ink-500">${product.basePrice.toFixed(2)}</p>
+          <Card key={product.id} className="flex flex-col gap-2">
+            {product.imageUrl ? (
+              <ZoomableImage
+                src={product.imageUrl}
+                alt=""
+                className="aspect-square w-full rounded-md border border-ink-200"
+              />
+            ) : (
+              <div className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed border-ink-200 text-xs text-ink-400">
+                No photo
               </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-ink-600">{product.stockQuantity} in stock</p>
-              {product.lowStock && <Badge tone="warning">Low stock</Badge>}
+            )}
+            <div className="flex flex-col gap-1">
+              <p className="line-clamp-1 font-medium text-ink-900">{product.name}</p>
+              <p className="text-xs uppercase tracking-wide text-ink-400">{product.categoryName}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-ink-900">${product.basePrice.toFixed(2)}</p>
+                {product.lowStock && <Badge tone="warning">Low stock</Badge>}
+              </div>
+              <p className="text-xs text-ink-500">{product.stockQuantity} in stock</p>
             </div>
           </Card>
         ))}
