@@ -2,6 +2,7 @@ package com.example.inventory.product;
 
 import com.example.inventory.dashboard.CategoryStockProjection;
 import jakarta.persistence.LockModeType;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,6 +46,16 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
   @Query("SELECT COALESCE(SUM(p.stockQuantity), 0) FROM Product p")
   long sumStockQuantity();
+
+  /**
+   * Current stock valued at selling price - what all of it would bring in if sold, margin included.
+   */
+  @Query("SELECT COALESCE(SUM(p.stockQuantity * p.basePrice), 0) FROM Product p")
+  BigDecimal sumInventoryValueAtBasePrice();
+
+  /** Current stock valued at what it cost to acquire - no markup, the raw cost basis on hand. */
+  @Query("SELECT COALESCE(SUM(p.stockQuantity * p.costPrice), 0) FROM Product p")
+  BigDecimal sumInventoryValueAtCostPrice();
 
   @Query(
       "SELECT COUNT(p) FROM Product p WHERE p.active = true AND p.stockQuantity <= p.lowStockThreshold")

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { CategoryBreakdownChart } from "../features/dashboard/CategoryBreakdownChart";
+import { InventoryValueCards } from "../features/dashboard/InventoryValueCards";
 import { LowStockList } from "../features/dashboard/LowStockList";
 import { RecentActivity } from "../features/dashboard/RecentActivity";
 import { SalesRevenueChart } from "../features/dashboard/SalesRevenueChart";
@@ -42,6 +43,8 @@ export function AdminDashboardPage() {
       </div>
 
       <SummaryCards summary={summary} />
+
+      <InventoryValueCards summary={summary} />
 
       {salesLoading ? (
         <LoadingSpinner />

@@ -138,6 +138,29 @@ class DashboardControllerTest extends AbstractIntegrationTest {
   }
 
   @Test
+  void summaryValuesCurrentStockAtBasePriceAndAtCostPrice() throws Exception {
+    String admin = adminToken();
+
+    var widgetA = persistProduct("Widget A", "WIDGET-A", 10, true);
+    widgetA.setBasePrice(new java.math.BigDecimal("5.00"));
+    widgetA.setCostPrice(new java.math.BigDecimal("2.00"));
+    productRepository.save(widgetA);
+
+    var widgetB = persistProduct("Widget B", "WIDGET-B", 4, true);
+    widgetB.setBasePrice(new java.math.BigDecimal("12.50"));
+    widgetB.setCostPrice(new java.math.BigDecimal("9.00"));
+    productRepository.save(widgetB);
+
+    // 10 * 5.00 + 4 * 12.50 = 100.00; 10 * 2.00 + 4 * 9.00 = 56.00 - profit still on the shelf:
+    // 44.00
+    mockMvc
+        .perform(get("/api/dashboard/summary").header(HttpHeaders.AUTHORIZATION, "Bearer " + admin))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.inventoryValueAtBasePrice").value(100.00))
+        .andExpect(jsonPath("$.inventoryValueAtCostPrice").value(56.00));
+  }
+
+  @Test
   void summaryCountsOnlyActiveEmployees() throws Exception {
     String admin = adminToken();
     persistUser("active-employee@example.com", Role.EMPLOYEE, true);

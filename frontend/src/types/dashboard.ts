@@ -23,6 +23,10 @@ export interface DashboardSummary {
   periodTo: string;
   periodSalesCount: number;
   periodRevenue: number;
+  /** Point-in-time value of current stock at selling price - includes the profit margin. */
+  inventoryValueAtBasePrice: number;
+  /** Point-in-time value of current stock at what it cost to acquire - no markup. */
+  inventoryValueAtCostPrice: number;
   salesByEmployee: EmployeeSalesSummary[];
   recentSales: RecentSaleSummary[];
   recentInventoryMovements: InventoryTransaction[];

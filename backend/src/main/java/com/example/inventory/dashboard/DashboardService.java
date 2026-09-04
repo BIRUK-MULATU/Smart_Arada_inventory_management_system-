@@ -55,6 +55,8 @@ public class DashboardService {
     long totalStock = productRepository.sumStockQuantity();
     long totalEmployees = userRepository.countByRoleAndActiveTrue(Role.EMPLOYEE);
     long lowStockCount = productRepository.countLowStock();
+    BigDecimal inventoryValueAtBasePrice = productRepository.sumInventoryValueAtBasePrice();
+    BigDecimal inventoryValueAtCostPrice = productRepository.sumInventoryValueAtCostPrice();
 
     long periodSalesCount = saleRepository.countByCreatedAtBetween(range.from(), range.to());
     var periodRevenue = saleRepository.sumRevenueBetween(range.from(), range.to());
@@ -84,6 +86,8 @@ public class DashboardService {
         range.toDate(),
         periodSalesCount,
         periodRevenue,
+        inventoryValueAtBasePrice,
+        inventoryValueAtCostPrice,
         salesByEmployee,
         recentSales,
         recentInventoryMovements);
