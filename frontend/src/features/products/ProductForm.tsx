@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../../components/Button";
@@ -36,6 +37,7 @@ export function ProductForm({ product, categories, onSubmit, onCancel }: Product
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -50,6 +52,14 @@ export function ProductForm({ product, categories, onSubmit, onCancel }: Product
       active: product?.active ?? true,
     },
   });
+
+  // useForm's defaultValues are only read once, at mount - uploading or removing a photo via
+  // ProductImageUpload updates `product` from outside this form (a separate mutation, not a form
+  // field), so without this the stale imageUrl already in the form would silently overwrite the
+  // upload the next time this form is saved.
+  useEffect(() => {
+    setValue("imageUrl", product?.imageUrl ?? "");
+  }, [product?.imageUrl, setValue]);
 
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
