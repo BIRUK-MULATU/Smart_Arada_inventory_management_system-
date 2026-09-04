@@ -32,9 +32,10 @@ public class ProductController {
   @GetMapping
   public List<ProductResponse> listProducts(
       @RequestParam(defaultValue = "false") boolean includeInactive,
+      @RequestParam(required = false) UUID categoryId,
       @AuthenticationPrincipal JwtUserPrincipal principal) {
     boolean effectiveIncludeInactive = includeInactive && principal.role() == Role.ADMIN;
-    return productService.listProducts(effectiveIncludeInactive);
+    return productService.listProducts(effectiveIncludeInactive, categoryId);
   }
 
   @GetMapping("/{id}")

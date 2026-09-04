@@ -12,9 +12,15 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
   List<Product> findByActiveTrue();
 
+  List<Product> findByActiveTrueAndCategoryId(UUID categoryId);
+
+  List<Product> findByCategoryId(UUID categoryId);
+
   boolean existsBySku(String sku);
 
   boolean existsBySkuAndIdNot(String sku, UUID id);
+
+  boolean existsByCategoryId(UUID categoryId);
 
   /**
    * Locks the product row for the duration of the caller's transaction, so concurrent stock

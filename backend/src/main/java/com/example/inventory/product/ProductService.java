@@ -11,15 +11,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
   private final ProductRepository productRepository;
+  private final CategoryRepository categoryRepository;
 
-  public ProductService(ProductRepository productRepository) {
+  public ProductService(
+      ProductRepository productRepository, CategoryRepository categoryRepository) {
     this.productRepository = productRepository;
+    this.categoryRepository = categoryRepository;
   }
 
   @Transactional(readOnly = true)
-  public List<ProductResponse> listProducts(boolean includeInactive) {
-    List<Product> products =
-        includeInactive ? productRepository.findAll() : productRepository.findByActiveTrue();
+  public List<ProductResponse> listProducts(boolean includeInactive, UUID categoryId) {
+    List<Product> products;
+    if (categoryId != null) {
+      products =
+          includeInactive
+              ? productRepository.findByCategoryId(categoryId)
+              : productRepository.findByActiveTrueAndCategoryId(categoryId);
+    } else {
+      products =
+          includeInactive ? productRepository.findAll() : productRepository.findByActiveTrue();
+    }
     return products.stream().map(ProductResponse::from).toList();
   }
 
@@ -38,6 +49,7 @@ public class ProductService {
     product.setName(request.name());
     product.setSku(request.sku());
     product.setImageUrl(request.imageUrl());
+    product.setCategory(findCategoryOrThrow(request.categoryId()));
     product.setBasePrice(request.basePrice());
     product.setLowStockThreshold(request.lowStockThreshold());
     product.setActive(true);
@@ -56,6 +68,7 @@ public class ProductService {
     product.setName(request.name());
     product.setSku(request.sku());
     product.setImageUrl(request.imageUrl());
+    product.setCategory(findCategoryOrThrow(request.categoryId()));
     product.setBasePrice(request.basePrice());
     product.setLowStockThreshold(request.lowStockThreshold());
     product.setActive(request.active());
@@ -86,5 +99,11 @@ public class ProductService {
     return productRepository
         .findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
+  }
+
+  private Category findCategoryOrThrow(UUID categoryId) {
+    return categoryRepository
+        .findById(categoryId)
+        .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + categoryId));
   }
 }

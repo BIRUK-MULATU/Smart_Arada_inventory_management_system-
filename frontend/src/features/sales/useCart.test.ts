@@ -9,6 +9,8 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     name: "Widget",
     sku: "WIDGET-1",
     imageUrl: null,
+    categoryId: "category-1",
+    categoryName: "General",
     basePrice: 10,
     stockQuantity: 5,
     lowStockThreshold: 2,

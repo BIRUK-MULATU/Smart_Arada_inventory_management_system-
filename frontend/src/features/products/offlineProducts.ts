@@ -24,6 +24,8 @@ export async function refreshProductSnapshot(): Promise<void> {
         name: product.name,
         sku: product.sku,
         imageUrl: product.imageUrl,
+        categoryId: product.categoryId,
+        categoryName: product.categoryName,
         basePrice: product.basePrice,
         stockQuantity: product.stockQuantity,
         lowStockThreshold: product.lowStockThreshold,

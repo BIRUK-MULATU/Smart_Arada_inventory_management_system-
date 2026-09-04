@@ -5,6 +5,7 @@ import { EmptyState } from "../components/EmptyState";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { Modal } from "../components/Modal";
+import { useCategories } from "../features/categories/useCategories";
 import type { ProductFormValues } from "../features/products/ProductForm";
 import { ProductForm } from "../features/products/ProductForm";
 import { ProductTable } from "../features/products/ProductTable";
@@ -14,7 +15,9 @@ import type { Product } from "../types/product";
 type DialogState = { mode: "create" } | { mode: "edit"; product: Product } | null;
 
 export function AdminProductsPage() {
-  const { data: products, isLoading, isError } = useProducts(true);
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const { data: categories } = useCategories();
+  const { data: products, isLoading, isError } = useProducts(true, categoryFilter || undefined);
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deactivateProduct = useDeactivateProduct();
@@ -31,6 +34,7 @@ export function AdminProductsPage() {
             name: values.name,
             sku: values.sku || undefined,
             imageUrl: values.imageUrl || undefined,
+            categoryId: values.categoryId,
             basePrice: values.basePrice,
             lowStockThreshold: values.lowStockThreshold,
             active: values.active,
@@ -41,6 +45,7 @@ export function AdminProductsPage() {
           name: values.name,
           sku: values.sku || undefined,
           imageUrl: values.imageUrl || undefined,
+          categoryId: values.categoryId,
           basePrice: values.basePrice,
           lowStockThreshold: values.lowStockThreshold,
         });
@@ -59,9 +64,24 @@ export function AdminProductsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-slate-900">Products</h1>
-        <Button onClick={() => setDialog({ mode: "create" })}>New product</Button>
+        <div className="flex items-center gap-3">
+          <select
+            aria-label="Filter by category"
+            value={categoryFilter}
+            onChange={(event) => setCategoryFilter(event.target.value)}
+            className="min-h-11 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
+          >
+            <option value="">All categories</option>
+            {categories?.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          <Button onClick={() => setDialog({ mode: "create" })}>New product</Button>
+        </div>
       </div>
 
       {isLoading && <LoadingSpinner />}
@@ -80,6 +100,7 @@ export function AdminProductsPage() {
           )}
           <ProductForm
             product={dialog.mode === "edit" ? dialog.product : undefined}
+            categories={categories ?? []}
             onSubmit={handleSubmit}
             onCancel={() => setDialog(null)}
           />

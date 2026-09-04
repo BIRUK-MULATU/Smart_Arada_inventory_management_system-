@@ -3,6 +3,9 @@ package com.example.inventory.product;
 import com.example.inventory.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 
@@ -17,6 +20,10 @@ public class Product extends BaseEntity {
 
   @Column(name = "image_url")
   private String imageUrl;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "category_id", nullable = false)
+  private Category category;
 
   @Column(name = "base_price", nullable = false, precision = 12, scale = 2)
   private BigDecimal basePrice;
@@ -52,6 +59,14 @@ public class Product extends BaseEntity {
 
   public void setImageUrl(String imageUrl) {
     this.imageUrl = imageUrl;
+  }
+
+  public Category getCategory() {
+    return category;
+  }
+
+  public void setCategory(Category category) {
+    this.category = category;
   }
 
   public BigDecimal getBasePrice() {

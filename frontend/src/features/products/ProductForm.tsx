@@ -3,12 +3,15 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
+import { Select } from "../../components/Select";
+import type { Category } from "../../types/category";
 import type { Product } from "../../types/product";
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   sku: z.string().optional(),
   imageUrl: z.union([z.url("Enter a valid URL"), z.literal("")]).optional(),
+  categoryId: z.string().min(1, "Choose a category"),
   basePrice: z.coerce.number().min(0, "Price must be zero or more"),
   lowStockThreshold: z.coerce.number().int().min(0, "Threshold must be zero or more"),
   active: z.boolean(),
@@ -23,11 +26,12 @@ export type ProductFormValues = z.output<typeof productSchema>;
 
 interface ProductFormProps {
   product?: Product;
+  categories: Category[];
   onSubmit: (values: ProductFormValues) => Promise<void>;
   onCancel: () => void;
 }
 
-export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
+export function ProductForm({ product, categories, onSubmit, onCancel }: ProductFormProps) {
   const {
     register,
     handleSubmit,
@@ -38,6 +42,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
       name: product?.name ?? "",
       sku: product?.sku ?? "",
       imageUrl: product?.imageUrl ?? "",
+      categoryId: product?.categoryId ?? "",
       basePrice: product?.basePrice ?? 0,
       lowStockThreshold: product?.lowStockThreshold ?? 0,
       active: product?.active ?? true,
@@ -49,6 +54,14 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
       <Input label="Name" error={errors.name?.message} {...register("name")} />
       <Input label="SKU (optional)" error={errors.sku?.message} {...register("sku")} />
       <Input label="Image URL (optional)" error={errors.imageUrl?.message} {...register("imageUrl")} />
+      <Select label="Category" error={errors.categoryId?.message} {...register("categoryId")}>
+        <option value="">Select a category…</option>
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
+          </option>
+        ))}
+      </Select>
       <Input
         label="Base price"
         type="number"

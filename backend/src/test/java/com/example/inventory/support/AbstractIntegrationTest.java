@@ -3,6 +3,8 @@ package com.example.inventory.support;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.example.inventory.inventory.InventoryTransactionRepository;
+import com.example.inventory.product.Category;
+import com.example.inventory.product.CategoryRepository;
 import com.example.inventory.product.Product;
 import com.example.inventory.product.ProductRepository;
 import com.example.inventory.sale.SaleRepository;
@@ -47,6 +49,8 @@ public abstract class AbstractIntegrationTest {
 
   @Autowired protected ProductRepository productRepository;
 
+  @Autowired protected CategoryRepository categoryRepository;
+
   @Autowired protected InventoryTransactionRepository inventoryTransactionRepository;
 
   @Autowired protected SaleRepository saleRepository;
@@ -55,15 +59,19 @@ public abstract class AbstractIntegrationTest {
 
   @Autowired protected ObjectMapper objectMapper;
 
+  private Category cachedDefaultCategory;
+
   @BeforeEach
   void cleanDatabase() {
-    // inventory_transactions and sales both have RESTRICT foreign keys to products/users, so
-    // they must be cleared first. sale_items cascades automatically when its parent sale is
-    // deleted.
+    // inventory_transactions and sales both have RESTRICT foreign keys to products/users, and
+    // products has a RESTRICT foreign key to categories, so they must be cleared in this order.
+    // sale_items cascades automatically when its parent sale is deleted.
     inventoryTransactionRepository.deleteAll();
     saleRepository.deleteAll();
     productRepository.deleteAll();
+    categoryRepository.deleteAll();
     userRepository.deleteAll();
+    cachedDefaultCategory = null;
   }
 
   protected User persistUser(String email, Role role, boolean active) {
@@ -76,10 +84,25 @@ public abstract class AbstractIntegrationTest {
     return userRepository.save(user);
   }
 
+  protected Category persistCategory(String name) {
+    Category category = new Category();
+    category.setName(name);
+    return categoryRepository.save(category);
+  }
+
+  /** A category shared across every persistProduct() call within one test, created on first use. */
+  protected Category defaultCategory() {
+    if (cachedDefaultCategory == null) {
+      cachedDefaultCategory = persistCategory("General");
+    }
+    return cachedDefaultCategory;
+  }
+
   protected Product persistProduct(String name, String sku, int stockQuantity, boolean active) {
     Product product = new Product();
     product.setName(name);
     product.setSku(sku);
+    product.setCategory(defaultCategory());
     product.setBasePrice(new BigDecimal("9.99"));
     product.setStockQuantity(stockQuantity);
     product.setLowStockThreshold(5);

@@ -17,6 +17,7 @@ export function ProductTable({ products, onEdit, onDeactivate }: ProductTablePro
         <thead className="bg-slate-50">
           <tr>
             <th className="px-4 py-2 text-left font-medium text-slate-600">Name</th>
+            <th className="px-4 py-2 text-left font-medium text-slate-600">Category</th>
             <th className="px-4 py-2 text-left font-medium text-slate-600">SKU</th>
             <th className="px-4 py-2 text-right font-medium text-slate-600">Base price</th>
             <th className="px-4 py-2 text-right font-medium text-slate-600">Stock</th>
@@ -28,6 +29,7 @@ export function ProductTable({ products, onEdit, onDeactivate }: ProductTablePro
           {products.map((product) => (
             <tr key={product.id}>
               <td className="px-4 py-2 font-medium text-slate-900">{product.name}</td>
+              <td className="px-4 py-2 text-slate-600">{product.categoryName}</td>
               <td className="px-4 py-2 text-slate-600">{product.sku ?? "—"}</td>
               <td className="px-4 py-2 text-right text-slate-600">${product.basePrice.toFixed(2)}</td>
               <td className="px-4 py-2 text-right text-slate-600">{product.stockQuantity}</td>

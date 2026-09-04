@@ -60,6 +60,7 @@ export function EmployeeNewSalePage() {
             <Card key={product.id} className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-slate-900">{product.name}</p>
+                <p className="text-xs uppercase tracking-wide text-slate-400">{product.categoryName}</p>
                 <p className="text-sm text-slate-500">
                   ${product.basePrice.toFixed(2)} · {product.stockQuantity} in stock
                 </p>

@@ -33,8 +33,8 @@ public class InventoryController {
   }
 
   @GetMapping
-  public List<ProductResponse> listInventory() {
-    return productService.listProducts(true);
+  public List<ProductResponse> listInventory(@RequestParam(required = false) UUID categoryId) {
+    return productService.listProducts(true, categoryId);
   }
 
   @GetMapping("/history")

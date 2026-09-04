@@ -29,7 +29,23 @@ class EndToEndFlowTest extends AbstractIntegrationTest {
     persistUser("admin@example.com", Role.ADMIN, true);
     String adminToken = loginAndGetToken("admin@example.com", RAW_PASSWORD);
 
-    // 2. Product management: admin creates and then updates a product.
+    // 2. Product management: admin creates a category, then creates and updates a product in it.
+    String categoryResponse =
+        mockMvc
+            .perform(
+                post("/api/categories")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name":"E2E Category"}
+                        """))
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String categoryId = objectMapper.readTree(categoryResponse).get("id").stringValue();
+
     String createResponse =
         mockMvc
             .perform(
@@ -38,8 +54,9 @@ class EndToEndFlowTest extends AbstractIntegrationTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
-                        {"name":"E2E Widget","sku":"E2E-1","basePrice":12.50,"lowStockThreshold":3}
-                        """))
+                        {"name":"E2E Widget","sku":"E2E-1","categoryId":"%s","basePrice":12.50,"lowStockThreshold":3}
+                        """
+                            .formatted(categoryId)))
             .andExpect(status().isCreated())
             .andReturn()
             .getResponse()
@@ -53,10 +70,12 @@ class EndToEndFlowTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                    {"name":"E2E Widget","sku":"E2E-1","basePrice":15.00,"lowStockThreshold":3,"active":true}
-                    """))
+                    {"name":"E2E Widget","sku":"E2E-1","categoryId":"%s","basePrice":15.00,"lowStockThreshold":3,"active":true}
+                    """
+                        .formatted(categoryId)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.basePrice").value(15.00));
+        .andExpect(jsonPath("$.basePrice").value(15.00))
+        .andExpect(jsonPath("$.categoryName").value("E2E Category"));
 
     // Stock starts at zero - admin stocks it up before anyone can sell it.
     mockMvc
@@ -87,8 +106,9 @@ class EndToEndFlowTest extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                    {"name":"Nope","basePrice":1.00,"lowStockThreshold":1}
-                    """))
+                    {"name":"Nope","categoryId":"%s","basePrice":1.00,"lowStockThreshold":1}
+                    """
+                        .formatted(categoryId)))
         .andExpect(status().isForbidden());
 
     // 4. Sale creation: an online sale deducts stock transactionally.

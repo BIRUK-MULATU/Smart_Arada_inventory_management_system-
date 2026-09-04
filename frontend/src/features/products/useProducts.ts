@@ -2,12 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { productsApi } from "../../api/productsApi";
 import type { CreateProductRequest, UpdateProductRequest } from "../../types/product";
 
-const productsKey = (includeInactive: boolean) => ["products", { includeInactive }] as const;
+const productsKey = (includeInactive: boolean, categoryId?: string) =>
+  ["products", { includeInactive, categoryId }] as const;
 
-export function useProducts(includeInactive = false) {
+export function useProducts(includeInactive = false, categoryId?: string) {
   return useQuery({
-    queryKey: productsKey(includeInactive),
-    queryFn: () => productsApi.list(includeInactive),
+    queryKey: productsKey(includeInactive, categoryId),
+    queryFn: () => productsApi.list(includeInactive, categoryId),
   });
 }
 

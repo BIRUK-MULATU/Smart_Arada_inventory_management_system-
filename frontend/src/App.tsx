@@ -15,6 +15,7 @@ import { RootRedirect } from "./routes/RootRedirect";
 // dependency in the app), and no employee ever navigates there, so it shouldn't be in everyone's
 // initial bundle. Splitting every page consistently, not just the dashboard, keeps this uniform.
 const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage").then((m) => ({ default: m.AdminDashboardPage })));
+const AdminCategoriesPage = lazy(() => import("./pages/AdminCategoriesPage").then((m) => ({ default: m.AdminCategoriesPage })));
 const AdminEmployeesPage = lazy(() => import("./pages/AdminEmployeesPage").then((m) => ({ default: m.AdminEmployeesPage })));
 const AdminInventoryPage = lazy(() => import("./pages/AdminInventoryPage").then((m) => ({ default: m.AdminInventoryPage })));
 const AdminProductsPage = lazy(() => import("./pages/AdminProductsPage").then((m) => ({ default: m.AdminProductsPage })));
@@ -51,6 +52,7 @@ function App() {
                   <Route element={<AdminLayout />}>
                     <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                     <Route path="/admin/products" element={<AdminProductsPage />} />
+                    <Route path="/admin/categories" element={<AdminCategoriesPage />} />
                     <Route path="/admin/inventory" element={<AdminInventoryPage />} />
                     <Route path="/admin/sales" element={<AdminSalesPage />} />
                     <Route path="/admin/sync" element={<AdminSyncPage />} />

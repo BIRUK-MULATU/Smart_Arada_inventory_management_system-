@@ -30,6 +30,14 @@ export class AppDatabase extends Dexie {
       syncQueue: "++id, entityType, entityId, clientTransactionId, status, createdAt",
       syncMetadata: "id",
     });
+
+    // Version 2: products cache gains categoryId/categoryName (Phase 13). Existing cached rows
+    // lack these fields until the next successful refreshProductSnapshot() (which always clears
+    // and rewrites the whole table), which is harmless - the cache is always treated as
+    // best-effort, last-known-good data anyway.
+    this.version(2).stores({
+      products: "id, name, sku, active, categoryId",
+    });
   }
 }
 

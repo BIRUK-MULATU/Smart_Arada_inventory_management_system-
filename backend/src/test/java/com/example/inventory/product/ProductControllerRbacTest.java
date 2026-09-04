@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.inventory.support.AbstractIntegrationTest;
 import com.example.inventory.user.Role;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -25,6 +26,13 @@ class ProductControllerRbacTest extends AbstractIntegrationTest {
     DEACTIVATE
   }
 
+  private UUID categoryId;
+
+  @BeforeEach
+  void setUpCategory() {
+    categoryId = persistCategory("Widgets").getId();
+  }
+
   private MockHttpServletRequestBuilder requestFor(WriteEndpoint endpoint, UUID targetId) {
     return switch (endpoint) {
       case CREATE ->
@@ -32,16 +40,18 @@ class ProductControllerRbacTest extends AbstractIntegrationTest {
               .contentType(MediaType.APPLICATION_JSON)
               .content(
                   """
-                                    {"name":"New Widget","sku":"WIDGET-NEW","basePrice":12.50,"lowStockThreshold":3}
-                                    """);
+                                    {"name":"New Widget","sku":"WIDGET-NEW","categoryId":"%s","basePrice":12.50,"lowStockThreshold":3}
+                                    """
+                      .formatted(categoryId));
       case UPDATE ->
           put("/api/products/" + targetId)
               .contentType(MediaType.APPLICATION_JSON)
               .content(
                   """
-                                    {"name":"Updated Widget","sku":"WIDGET-1","basePrice":15.00,
+                                    {"name":"Updated Widget","sku":"WIDGET-1","categoryId":"%s","basePrice":15.00,
                                      "lowStockThreshold":3,"active":true}
-                                    """);
+                                    """
+                      .formatted(categoryId));
       case DEACTIVATE -> delete("/api/products/" + targetId);
     };
   }
@@ -215,5 +225,35 @@ class ProductControllerRbacTest extends AbstractIntegrationTest {
             get("/api/products/" + UUID.randomUUID())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void filteringByCategoryIdReturnsOnlyThatCategorysProducts() throws Exception {
+    persistUser("employee@example.com", Role.EMPLOYEE, true);
+    String employeeToken = loginAndGetToken("employee@example.com", RAW_PASSWORD);
+    var electronics = persistCategory("Electronics");
+    var glassware = persistCategory("Glassware");
+
+    Product tv = new Product();
+    tv.setName("TV");
+    tv.setCategory(electronics);
+    tv.setBasePrice(new java.math.BigDecimal("300.00"));
+    tv.setLowStockThreshold(1);
+    productRepository.save(tv);
+
+    Product glass = new Product();
+    glass.setName("Drinking Glass");
+    glass.setCategory(glassware);
+    glass.setBasePrice(new java.math.BigDecimal("2.00"));
+    glass.setLowStockThreshold(5);
+    productRepository.save(glass);
+
+    mockMvc
+        .perform(
+            get("/api/products?categoryId=" + electronics.getId())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + employeeToken))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].name").value("TV"));
   }
 }

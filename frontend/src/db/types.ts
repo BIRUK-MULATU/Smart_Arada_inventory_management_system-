@@ -16,6 +16,8 @@ export interface LocalProduct {
   name: string;
   sku: string | null;
   imageUrl: string | null;
+  categoryId: string;
+  categoryName: string;
   basePrice: number;
   stockQuantity: number;
   lowStockThreshold: number;

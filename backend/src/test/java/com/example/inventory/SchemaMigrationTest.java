@@ -59,15 +59,32 @@ class SchemaMigrationTest {
     return id;
   }
 
-  private UUID insertProduct(int stockQuantity) throws SQLException {
+  private UUID insertCategory() throws SQLException {
+    // Deliberately inserts its own category rather than relying on the "Uncategorized" row seeded
+    // by the V4 migration - other test classes sharing this same Testcontainers instance clean out
+    // the categories table between tests, so that seed row isn't guaranteed to still exist here.
     UUID id = UUID.randomUUID();
     try (PreparedStatement ps =
+        conn.prepareStatement("INSERT INTO categories (id, name) VALUES (?, ?)")) {
+      ps.setObject(1, id);
+      ps.setString(2, "Test Category " + id);
+      ps.executeUpdate();
+    }
+    return id;
+  }
+
+  private UUID insertProduct(int stockQuantity) throws SQLException {
+    UUID id = UUID.randomUUID();
+    UUID categoryId = insertCategory();
+    try (PreparedStatement ps =
         conn.prepareStatement(
-            "INSERT INTO products (id, name, base_price, stock_quantity, low_stock_threshold) "
-                + "VALUES (?, ?, 10.00, ?, 5)")) {
+            "INSERT INTO products (id, name, category_id, base_price, stock_quantity,"
+                + " low_stock_threshold) "
+                + "VALUES (?, ?, ?, 10.00, ?, 5)")) {
       ps.setObject(1, id);
       ps.setString(2, "Test Product");
-      ps.setInt(3, stockQuantity);
+      ps.setObject(3, categoryId);
+      ps.setInt(4, stockQuantity);
       ps.executeUpdate();
     }
     return id;

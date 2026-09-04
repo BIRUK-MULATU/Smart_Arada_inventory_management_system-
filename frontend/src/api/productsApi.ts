@@ -2,8 +2,8 @@ import { apiClient } from "./client";
 import type { CreateProductRequest, Product, UpdateProductRequest } from "../types/product";
 
 export const productsApi = {
-  async list(includeInactive = false): Promise<Product[]> {
-    const response = await apiClient.get<Product[]>("/products", { params: { includeInactive } });
+  async list(includeInactive = false, categoryId?: string): Promise<Product[]> {
+    const response = await apiClient.get<Product[]>("/products", { params: { includeInactive, categoryId } });
     return response.data;
   },
 
