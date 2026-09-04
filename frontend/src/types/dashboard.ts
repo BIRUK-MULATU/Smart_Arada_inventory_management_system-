@@ -28,6 +28,8 @@ export interface DashboardSummary {
   recentInventoryMovements: InventoryTransaction[];
 }
 
+export type SalesGranularity = "DAILY" | "MONTHLY" | "YEARLY";
+
 export interface DailySalesPoint {
   day: string;
   salesCount: number;
@@ -39,4 +41,12 @@ export interface TopProduct {
   productName: string;
   unitsSold: number;
   revenue: number;
+}
+
+export interface CategoryBreakdown {
+  categoryId: string;
+  categoryName: string;
+  unitsSold: number;
+  revenue: number;
+  stockOnHand: number;
 }

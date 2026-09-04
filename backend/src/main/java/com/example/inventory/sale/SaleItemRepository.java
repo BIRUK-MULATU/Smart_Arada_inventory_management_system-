@@ -1,5 +1,6 @@
 package com.example.inventory.sale;
 
+import com.example.inventory.dashboard.CategorySalesProjection;
 import com.example.inventory.dashboard.TopProductProjection;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -24,4 +25,12 @@ public interface SaleItemRepository extends JpaRepository<SaleItem, UUID> {
       "SELECT COALESCE(SUM(i.costPrice * i.quantity), 0) FROM SaleItem i "
           + "WHERE i.createdAt BETWEEN :from AND :to")
   BigDecimal sumCostOfGoodsSoldBetween(@Param("from") Instant from, @Param("to") Instant to);
+
+  @Query(
+      "SELECT i.product.category.id AS categoryId, i.product.category.name AS categoryName, "
+          + "SUM(i.quantity) AS unitsSold, COALESCE(SUM(i.subtotal), 0) AS revenue "
+          + "FROM SaleItem i WHERE i.createdAt BETWEEN :from AND :to "
+          + "GROUP BY i.product.category.id, i.product.category.name")
+  List<CategorySalesProjection> findSalesByCategory(
+      @Param("from") Instant from, @Param("to") Instant to);
 }

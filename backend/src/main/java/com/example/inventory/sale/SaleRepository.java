@@ -56,12 +56,19 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
   List<EmployeeSalesProjection> findSalesByEmployee(
       @Param("from") Instant from, @Param("to") Instant to);
 
+  /**
+   * {@code unit} is a Postgres date_trunc() unit ('day', 'month', or 'year'), passed as an ordinary
+   * bind parameter (safe from injection either way) but always sourced from {@link
+   * com.example.inventory.dashboard.SalesGranularity#truncUnit()} rather than directly from request
+   * input, so only the three values that enum defines can ever reach this query.
+   */
   @Query(
       value =
-          "SELECT CAST(created_at AS DATE) AS day, COUNT(*) AS sales_count, "
-              + "COALESCE(SUM(total_amount), 0) AS revenue FROM sales "
-              + "WHERE created_at BETWEEN :from AND :to "
-              + "GROUP BY CAST(created_at AS DATE) ORDER BY day",
+          "SELECT bucket AS day, COUNT(*) AS sales_count, COALESCE(SUM(total_amount), 0) AS revenue "
+              + "FROM (SELECT date_trunc(:unit, created_at)::date AS bucket, total_amount FROM sales "
+              + "      WHERE created_at BETWEEN :from AND :to) bucketed "
+              + "GROUP BY bucket ORDER BY bucket",
       nativeQuery = true)
-  List<DailySalesProjection> findDailySales(@Param("from") Instant from, @Param("to") Instant to);
+  List<DailySalesProjection> findSalesGroupedByPeriod(
+      @Param("from") Instant from, @Param("to") Instant to, @Param("unit") String unit);
 }

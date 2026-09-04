@@ -24,6 +24,7 @@ class DashboardControllerTest extends AbstractIntegrationTest {
     return Stream.of(
         "/api/dashboard/summary",
         "/api/dashboard/sales",
+        "/api/dashboard/categories",
         "/api/dashboard/low-stock",
         "/api/dashboard/top-products");
   }
@@ -252,5 +253,96 @@ class DashboardControllerTest extends AbstractIntegrationTest {
         .andExpect(jsonPath("$[0].unitsSold").value(10))
         .andExpect(jsonPath("$[1].productId").value(unpopular.getId().toString()))
         .andExpect(jsonPath("$[1].unitsSold").value(1));
+  }
+
+  @Test
+  void monthlyGranularityBucketsSalesByMonthNotByDay() throws Exception {
+    String admin = adminToken();
+    String employee = employeeToken("employee@example.com");
+    var product = persistProduct("Widget", "WIDGET-1", 100, true);
+    stockIn(admin, product.getId(), 50);
+    createSale(employee, product.getId(), 2, "10.00");
+    createSale(employee, product.getId(), 3, "10.00");
+
+    String response =
+        mockMvc
+            .perform(
+                get("/api/dashboard/sales?granularity=MONTHLY")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + admin))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    // Both sales happened today, so under monthly grouping they collapse into one bucket dated
+    // the 1st of this month, with a combined salesCount of 2.
+    var firstOfMonth = LocalDate.now(ZoneOffset.UTC).withDayOfMonth(1).toString();
+    assertThat(response).contains(firstOfMonth);
+    assertThat(response).contains("\"salesCount\":2");
+  }
+
+  @Test
+  void yearlyGranularityBucketsSalesByYear() throws Exception {
+    String admin = adminToken();
+    String employee = employeeToken("employee@example.com");
+    var product = persistProduct("Widget", "WIDGET-1", 100, true);
+    stockIn(admin, product.getId(), 50);
+    createSale(employee, product.getId(), 1, "10.00");
+
+    String response =
+        mockMvc
+            .perform(
+                get("/api/dashboard/sales?granularity=YEARLY")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + admin))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    var firstOfYear = LocalDate.now(ZoneOffset.UTC).withDayOfYear(1).toString();
+    assertThat(response).contains(firstOfYear);
+  }
+
+  @Test
+  void categoryBreakdownCombinesSalesAndStockPerCategory() throws Exception {
+    String admin = adminToken();
+    String employee = employeeToken("employee@example.com");
+    var electronics = persistCategory("Electronics");
+    var glassware = persistCategory("Glassware");
+
+    var tv = new com.example.inventory.product.Product();
+    tv.setName("TV");
+    tv.setCategory(electronics);
+    tv.setBasePrice(new java.math.BigDecimal("100.00"));
+    tv.setStockQuantity(0);
+    tv.setLowStockThreshold(1);
+    tv.setActive(true);
+    productRepository.save(tv);
+    stockIn(admin, tv.getId(), 20);
+
+    var glass = new com.example.inventory.product.Product();
+    glass.setName("Drinking Glass");
+    glass.setCategory(glassware);
+    glass.setBasePrice(new java.math.BigDecimal("2.00"));
+    glass.setStockQuantity(50);
+    glass.setLowStockThreshold(5);
+    glass.setActive(true);
+    productRepository.save(glass);
+
+    createSale(employee, tv.getId(), 3, "100.00");
+
+    mockMvc
+        .perform(
+            get("/api/dashboard/categories").header(HttpHeaders.AUTHORIZATION, "Bearer " + admin))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(2))
+        .andExpect(jsonPath("$[0].categoryName").value("Electronics"))
+        .andExpect(jsonPath("$[0].unitsSold").value(3))
+        .andExpect(jsonPath("$[0].revenue").value(300.00))
+        .andExpect(jsonPath("$[0].stockOnHand").value(17))
+        .andExpect(jsonPath("$[1].categoryName").value("Glassware"))
+        .andExpect(jsonPath("$[1].unitsSold").value(0))
+        .andExpect(jsonPath("$[1].revenue").value(0))
+        .andExpect(jsonPath("$[1].stockOnHand").value(50));
   }
 }

@@ -8,11 +8,16 @@ import com.example.inventory.sale.SaleItemRepository;
 import com.example.inventory.sale.SaleRepository;
 import com.example.inventory.user.Role;
 import com.example.inventory.user.UserRepository;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,9 +90,12 @@ public class DashboardService {
   }
 
   @Transactional(readOnly = true)
-  public List<DailySalesPoint> getDailySales(LocalDate from, LocalDate to) {
+  public List<DailySalesPoint> getSalesOverTime(
+      LocalDate from, LocalDate to, SalesGranularity granularity) {
     DateRange range = resolveRange(from, to);
-    return saleRepository.findDailySales(range.from(), range.to()).stream()
+    return saleRepository
+        .findSalesGroupedByPeriod(range.from(), range.to(), granularity.truncUnit())
+        .stream()
         .map(DailySalesPoint::from)
         .toList();
   }
@@ -106,6 +114,50 @@ public class DashboardService {
         .map(TopProductResponse::from)
         .toList();
   }
+
+  /**
+   * Revenue and units sold per category for the period, merged with each category's current
+   * stock-on-hand (not period-bound - stock is a point-in-time figure). A category with stock but
+   * no sales in the period, or sales but its products have since been deactivated, still appears.
+   */
+  @Transactional(readOnly = true)
+  public List<CategoryBreakdownResponse> getCategoryBreakdown(LocalDate from, LocalDate to) {
+    DateRange range = resolveRange(from, to);
+
+    Map<UUID, CategoryAccumulator> byCategory = new LinkedHashMap<>();
+    for (CategoryStockProjection stock : productRepository.sumStockByCategory()) {
+      byCategory.put(
+          stock.getCategoryId(),
+          new CategoryAccumulator(
+              stock.getCategoryName(), 0, BigDecimal.ZERO, stock.getStockOnHand()));
+    }
+    for (CategorySalesProjection sales :
+        saleItemRepository.findSalesByCategory(range.from(), range.to())) {
+      long stockOnHand =
+          byCategory.containsKey(sales.getCategoryId())
+              ? byCategory.get(sales.getCategoryId()).stockOnHand()
+              : 0;
+      byCategory.put(
+          sales.getCategoryId(),
+          new CategoryAccumulator(
+              sales.getCategoryName(), sales.getUnitsSold(), sales.getRevenue(), stockOnHand));
+    }
+
+    return byCategory.entrySet().stream()
+        .map(
+            entry ->
+                new CategoryBreakdownResponse(
+                    entry.getKey(),
+                    entry.getValue().categoryName(),
+                    entry.getValue().unitsSold(),
+                    entry.getValue().revenue(),
+                    entry.getValue().stockOnHand()))
+        .sorted(Comparator.comparing(CategoryBreakdownResponse::revenue).reversed())
+        .toList();
+  }
+
+  private record CategoryAccumulator(
+      String categoryName, long unitsSold, BigDecimal revenue, long stockOnHand) {}
 
   private DateRange resolveRange(LocalDate from, LocalDate to) {
     LocalDate effectiveTo = to != null ? to : LocalDate.now(ZoneOffset.UTC);

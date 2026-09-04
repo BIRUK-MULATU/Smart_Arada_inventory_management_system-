@@ -1,5 +1,6 @@
 package com.example.inventory.product;
 
+import com.example.inventory.dashboard.CategoryStockProjection;
 import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
@@ -41,4 +42,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
   @Query(
       "SELECT p FROM Product p WHERE p.active = true AND p.stockQuantity <= p.lowStockThreshold ORDER BY p.name")
   List<Product> findLowStock();
+
+  @Query(
+      "SELECT p.category.id AS categoryId, p.category.name AS categoryName, "
+          + "COALESCE(SUM(p.stockQuantity), 0) AS stockOnHand FROM Product p "
+          + "WHERE p.active = true GROUP BY p.category.id, p.category.name")
+  List<CategoryStockProjection> sumStockByCategory();
 }

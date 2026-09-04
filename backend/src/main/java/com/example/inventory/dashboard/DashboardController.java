@@ -33,8 +33,16 @@ public class DashboardController {
   @GetMapping("/sales")
   public List<DailySalesPoint> getSales(
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+      @RequestParam(defaultValue = "DAILY") SalesGranularity granularity) {
+    return dashboardService.getSalesOverTime(from, to, granularity);
+  }
+
+  @GetMapping("/categories")
+  public List<CategoryBreakdownResponse> getCategoryBreakdown(
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-    return dashboardService.getDailySales(from, to);
+    return dashboardService.getCategoryBreakdown(from, to);
   }
 
   @GetMapping("/low-stock")

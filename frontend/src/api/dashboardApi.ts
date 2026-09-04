@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import type { DailySalesPoint, DashboardSummary, TopProduct } from "../types/dashboard";
+import type { CategoryBreakdown, DailySalesPoint, DashboardSummary, SalesGranularity, TopProduct } from "../types/dashboard";
 import type { Product } from "../types/product";
 
 export interface DateRangeParams {
@@ -13,8 +13,15 @@ export const dashboardApi = {
     return response.data;
   },
 
-  async sales(range: DateRangeParams = {}): Promise<DailySalesPoint[]> {
-    const response = await apiClient.get<DailySalesPoint[]>("/dashboard/sales", { params: range });
+  async sales(range: DateRangeParams = {}, granularity: SalesGranularity = "DAILY"): Promise<DailySalesPoint[]> {
+    const response = await apiClient.get<DailySalesPoint[]>("/dashboard/sales", {
+      params: { ...range, granularity },
+    });
+    return response.data;
+  },
+
+  async categoryBreakdown(range: DateRangeParams = {}): Promise<CategoryBreakdown[]> {
+    const response = await apiClient.get<CategoryBreakdown[]>("/dashboard/categories", { params: range });
     return response.data;
   },
 

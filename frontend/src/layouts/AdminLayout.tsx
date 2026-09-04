@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { OnlineStatusBanner } from "../components/OnlineStatusBanner";
 import { useAuth } from "../features/auth/useAuth";
@@ -15,19 +16,35 @@ const navItems = [
 
 export function AdminLayout() {
   const { user, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <aside className="flex w-56 shrink-0 flex-col border-r border-slate-200 bg-white">
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 -translate-x-full flex-col border-r
+          border-slate-200 bg-white transition-transform duration-200 md:static md:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : ""
+          }`}
+      >
         <div className="border-b border-slate-200 px-4 py-4">
           <p className="text-sm font-semibold text-slate-900">Inventory &amp; Sales</p>
           <p className="text-xs text-slate-500">Admin</p>
         </div>
-        <nav className="flex-1 space-y-1 p-2">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-2">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 `block rounded-md px-3 py-2 text-sm font-medium ${
                   isActive ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
@@ -49,12 +66,26 @@ export function AdminLayout() {
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-y-auto">
-        <OnlineStatusBanner />
-        <div className="p-6">
-          <Outlet />
-        </div>
-      </main>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 md:hidden">
+          <button
+            type="button"
+            aria-label="Open menu"
+            onClick={() => setSidebarOpen(true)}
+            className="flex h-11 w-11 items-center justify-center rounded-md border border-slate-300 text-slate-700"
+          >
+            ☰
+          </button>
+          <p className="text-sm font-semibold text-slate-900">Inventory &amp; Sales</p>
+        </header>
+        <main className="flex-1 overflow-y-auto">
+          <OnlineStatusBanner />
+          <div className="p-4 sm:p-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
