@@ -8,6 +8,18 @@ import { Select } from "../../components/Select";
 import type { Category } from "../../types/category";
 import type { Product } from "../../types/product";
 
+// z.url() rejects anything without an explicit http(s):// prefix - but a pasted link often
+// doesn't have one ("www.example.com/photo.jpg", "example.com/photo.jpg"), which silently failed
+// validation with an easy-to-miss inline error and made the field look broken. Prepending https://
+// when it's missing makes the field accept what people actually paste.
+function normalizeImageUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed || /^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   sku: z.string().optional(),
@@ -69,7 +81,12 @@ export function ProductForm({ product, categories, onSubmit, onCancel }: Product
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
       <Input label="Name" error={errors.name?.message} {...register("name")} />
       <Input label="SKU (optional)" error={errors.sku?.message} {...register("sku")} />
-      <Input label="Image URL (optional)" error={errors.imageUrl?.message} {...register("imageUrl")} />
+      <Input
+        label="Image URL (optional)"
+        placeholder="example.com/photo.jpg"
+        error={errors.imageUrl?.message}
+        {...register("imageUrl", { setValueAs: normalizeImageUrl })}
+      />
       <Select label="Category" error={errors.categoryId?.message} {...register("categoryId")}>
         <option value="">Select a category…</option>
         {categories.map((category) => (
