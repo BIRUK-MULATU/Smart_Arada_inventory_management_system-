@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { extractErrorMessage } from "../api/errors";
+import { Button } from "../components/Button";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -20,9 +21,16 @@ import {
   useFinanceSummary,
   useRecordExpense,
 } from "../features/finance/useFinance";
-import type { BudgetActual, Expense } from "../types/finance";
+import type { BudgetActual, Expense, PeriodType } from "../types/finance";
 
 const DEFAULT_PERIOD_DAYS = 30;
+
+const PERIOD_LABELS: Record<PeriodType, string> = {
+  MONTHLY: "Monthly",
+  QUARTERLY: "Quarterly",
+  YEARLY: "Yearly",
+  CUSTOM: "Custom",
+};
 
 function isoDate(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -88,13 +96,73 @@ export function AdminFinancePage() {
     }
   };
 
+  const handleDownloadPdf = async () => {
+    const { addTable, createReport, dateStamp, savePdf } = await import("../utils/pdfExport");
+    const { doc, startY } = createReport("Finance report", `${from} – ${to}`);
+    let cursorY = startY;
+
+    if (summary) {
+      cursorY = addTable(doc, {
+        title: "Summary",
+        head: [["Revenue", "Cost of goods sold", "Gross profit", "Total expenses", "Net profit"]],
+        body: [
+          [
+            `$${summary.revenue.toFixed(2)}`,
+            `$${summary.costOfGoodsSold.toFixed(2)}`,
+            `$${summary.grossProfit.toFixed(2)}`,
+            `$${summary.totalExpenses.toFixed(2)}`,
+            `$${summary.netProfit.toFixed(2)}`,
+          ],
+        ],
+        startY: cursorY,
+      });
+    }
+
+    if (budgets && budgets.length > 0) {
+      cursorY = addTable(doc, {
+        title: "Budgets",
+        head: [["Category", "Period", "Range", "Budget", "Actual"]],
+        body: budgets.map((budget) => [
+          budget.category,
+          PERIOD_LABELS[budget.periodType],
+          `${budget.periodStart} – ${budget.periodEnd}`,
+          `$${budget.budgetAmount.toFixed(2)}`,
+          `$${budget.actualAmount.toFixed(2)}`,
+        ]),
+        startY: cursorY,
+      });
+    }
+
+    if (expenses && expenses.content.length > 0) {
+      addTable(doc, {
+        title: `Expenses (page ${expensePage + 1} of ${expenses.page.totalPages})`,
+        head: [["Date", "Category", "Description", "Amount", "Recorded by"]],
+        body: expenses.content.map((expense) => [
+          expense.incurredOn,
+          expense.category,
+          expense.description,
+          `$${expense.amount.toFixed(2)}`,
+          expense.recordedByName,
+        ]),
+        startY: cursorY,
+      });
+    }
+
+    savePdf(doc, `finance-${dateStamp()}.pdf`);
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold text-ink-900">Finance</h1>
-        <p className="text-sm text-ink-500">
-          {from} – {to}
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-ink-900">Finance</h1>
+          <p className="text-sm text-ink-500">
+            {from} – {to}
+          </p>
+        </div>
+        <Button variant="secondary" onClick={handleDownloadPdf}>
+          Download PDF
+        </Button>
       </div>
 
       {summaryLoading && <LoadingSpinner />}

@@ -65,6 +65,29 @@ export function AdminProductsPage() {
     }
   };
 
+  const handleDownloadPdf = async () => {
+    if (!products) {
+      return;
+    }
+    const { addTable, createReport, dateStamp, savePdf } = await import("../utils/pdfExport");
+    const categoryName = categoryFilter ? categories?.find((c) => c.id === categoryFilter)?.name : undefined;
+    const { doc, startY } = createReport("Product catalog", categoryName ? `Category: ${categoryName}` : "All categories");
+    addTable(doc, {
+      head: [["Name", "Category", "SKU", "Base price", "Wholesale price", "Stock", "Status"]],
+      body: products.map((product) => [
+        product.name,
+        product.categoryName,
+        product.sku ?? "—",
+        `$${product.basePrice.toFixed(2)}`,
+        product.costPrice !== null ? `$${product.costPrice.toFixed(2)}` : "—",
+        String(product.stockQuantity),
+        !product.active ? "Inactive" : product.lowStock ? "Low stock" : "Active",
+      ]),
+      startY,
+    });
+    savePdf(doc, `products-${dateStamp()}.pdf`);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -83,6 +106,9 @@ export function AdminProductsPage() {
               </option>
             ))}
           </select>
+          <Button variant="secondary" onClick={handleDownloadPdf} disabled={!products}>
+            Download PDF
+          </Button>
           <Button onClick={() => setDialog({ mode: "create" })}>New product</Button>
         </div>
       </div>

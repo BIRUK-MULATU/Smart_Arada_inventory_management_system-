@@ -34,11 +34,52 @@ export function AdminInventoryPage() {
     }
   };
 
+  const handleDownloadPdf = async () => {
+    if (!products) {
+      return;
+    }
+    const { addTable, createReport, dateStamp, savePdf } = await import("../utils/pdfExport");
+    const { doc, startY } = createReport("Inventory report");
+    const cursorY = addTable(doc, {
+      title: "Current stock",
+      head: [["Name", "Category", "SKU", "Stock", "Status"]],
+      body: products.map((product) => [
+        product.name,
+        product.categoryName,
+        product.sku ?? "—",
+        String(product.stockQuantity),
+        !product.active ? "Inactive" : product.lowStock ? "Low stock" : "Active",
+      ]),
+      startY,
+    });
+    if (history && history.content.length > 0) {
+      addTable(doc, {
+        title: `Recent movements (page ${historyPage + 1} of ${history.page.totalPages})`,
+        head: [["Product", "Type", "Quantity", "Stock after", "Performed by", "When"]],
+        body: history.content.map((transaction) => [
+          transaction.productName,
+          transaction.type,
+          String(transaction.quantity),
+          String(transaction.newQuantity),
+          transaction.performedByName,
+          new Date(transaction.createdAt).toLocaleString(),
+        ]),
+        startY: cursorY,
+      });
+    }
+    savePdf(doc, `inventory-${dateStamp()}.pdf`);
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-ink-900">Inventory</h1>
-        <Button onClick={() => setDialogOpen(true)}>Stock in</Button>
+        <div className="flex items-center gap-3">
+          <Button variant="secondary" onClick={handleDownloadPdf} disabled={!products}>
+            Download PDF
+          </Button>
+          <Button onClick={() => setDialogOpen(true)}>Stock in</Button>
+        </div>
       </div>
 
       {isLoading && <LoadingSpinner />}
