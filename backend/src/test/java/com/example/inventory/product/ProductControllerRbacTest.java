@@ -228,6 +228,24 @@ class ProductControllerRbacTest extends AbstractIntegrationTest {
   }
 
   @Test
+  void listIsSortedAlphabeticallyByNameCaseInsensitively() throws Exception {
+    persistUser("employee@example.com", Role.EMPLOYEE, true);
+    String employeeToken = loginAndGetToken("employee@example.com", RAW_PASSWORD);
+    persistProduct("Zebra Widget", "WIDGET-Z", 10, true);
+    // Lowercase-led on purpose: a plain database-collation sort can push this after every
+    // uppercase-led name, which is not what a human means by "alphabetical".
+    persistProduct("apple widget", "WIDGET-A", 10, true);
+    persistProduct("Mango Widget", "WIDGET-M", 10, true);
+
+    mockMvc
+        .perform(get("/api/products").header(HttpHeaders.AUTHORIZATION, "Bearer " + employeeToken))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].name").value("apple widget"))
+        .andExpect(jsonPath("$[1].name").value("Mango Widget"))
+        .andExpect(jsonPath("$[2].name").value("Zebra Widget"));
+  }
+
+  @Test
   void filteringByCategoryIdReturnsOnlyThatCategorysProducts() throws Exception {
     persistUser("employee@example.com", Role.EMPLOYEE, true);
     String employeeToken = loginAndGetToken("employee@example.com", RAW_PASSWORD);

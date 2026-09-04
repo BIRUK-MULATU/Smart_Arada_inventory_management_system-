@@ -26,11 +26,13 @@ public class ProductService {
     if (categoryId != null) {
       products =
           includeInactive
-              ? productRepository.findByCategoryId(categoryId)
-              : productRepository.findByActiveTrueAndCategoryId(categoryId);
+              ? productRepository.findByCategoryIdOrderedByName(categoryId)
+              : productRepository.findByActiveTrueAndCategoryIdOrderedByName(categoryId);
     } else {
       products =
-          includeInactive ? productRepository.findAll() : productRepository.findByActiveTrue();
+          includeInactive
+              ? productRepository.findAllOrderedByName()
+              : productRepository.findByActiveTrueOrderedByName();
     }
     return products.stream().map(ProductResponse::from).toList();
   }

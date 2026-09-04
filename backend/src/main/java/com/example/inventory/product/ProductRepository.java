@@ -11,11 +11,22 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-  List<Product> findByActiveTrue();
+  // Sorted with LOWER(name) rather than a plain derived-method OrderByName: seeded/real product
+  // names mix case ("TV", "stov", ...) and the database's default collation may sort
+  // uppercase-first, which would scatter lowercase-led names out of the alphabetical order a user
+  // actually expects.
+  @Query("SELECT p FROM Product p ORDER BY LOWER(p.name)")
+  List<Product> findAllOrderedByName();
 
-  List<Product> findByActiveTrueAndCategoryId(UUID categoryId);
+  @Query("SELECT p FROM Product p WHERE p.active = true ORDER BY LOWER(p.name)")
+  List<Product> findByActiveTrueOrderedByName();
 
-  List<Product> findByCategoryId(UUID categoryId);
+  @Query(
+      "SELECT p FROM Product p WHERE p.active = true AND p.category.id = :categoryId ORDER BY LOWER(p.name)")
+  List<Product> findByActiveTrueAndCategoryIdOrderedByName(UUID categoryId);
+
+  @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId ORDER BY LOWER(p.name)")
+  List<Product> findByCategoryIdOrderedByName(UUID categoryId);
 
   boolean existsBySku(String sku);
 

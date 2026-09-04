@@ -22,8 +22,16 @@ export function useOfflineProducts() {
 
   // refreshProductSnapshot only ever caches active products (it fetches with
   // includeInactive=false, matching the employee-facing default from Phase 4), so no further
-  // filtering is needed here.
-  const products = useLiveQuery(() => db.products.toArray(), []);
+  // filtering is needed here. Dexie's own .orderBy("name") does a raw code-unit comparison
+  // (case-sensitive, uppercase before lowercase), so the case-insensitive alphabetical sort is
+  // done in JS with localeCompare instead - same intent as the backend's LOWER(name) ordering.
+  const products = useLiveQuery(
+    () =>
+      db.products
+        .toArray()
+        .then((items) => items.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }))),
+    [],
+  );
   const snapshot = useLiveQuery(() => db.inventorySnapshot.get("current"), []);
 
   return { products, fetchedAt: snapshot?.fetchedAt ?? null };
