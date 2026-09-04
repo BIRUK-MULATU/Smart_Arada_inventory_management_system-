@@ -42,20 +42,20 @@ export function ProductImageUpload({ product, onUpdated }: ProductImageUploadPro
   return (
     <div className="flex flex-col gap-2">
       <span className="text-sm font-medium text-slate-700">Photo</span>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col items-center gap-3">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="h-16 w-16 rounded-md border border-slate-200 object-cover"
+            className="h-48 w-48 rounded-lg border border-slate-200 object-cover"
           />
         ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-md border border-dashed border-slate-300 text-center text-xs text-slate-400">
+          <div className="flex h-48 w-48 items-center justify-center rounded-lg border border-dashed border-slate-300 text-center text-sm text-slate-400">
             No photo
           </div>
         )}
-        <div className="flex flex-col gap-1">
-          <label className="min-h-11 cursor-pointer rounded-md border border-slate-300 px-3 py-2 text-center text-sm font-medium text-slate-700 hover:bg-slate-50">
+        <div className="flex w-full flex-col items-center gap-1">
+          <label className="min-h-11 w-full cursor-pointer rounded-md border border-slate-300 px-3 py-2 text-center text-sm font-medium text-slate-700 hover:bg-slate-50">
             {uploadImage.isPending ? "Uploading…" : "Upload from device"}
             <input
               type="file"

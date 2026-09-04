@@ -64,10 +64,10 @@ export function EmployeeProductsPage() {
                 <img
                   src={product.imageUrl}
                   alt=""
-                  className="h-12 w-12 shrink-0 rounded-md border border-slate-200 object-cover"
+                  className="h-20 w-20 shrink-0 rounded-md border border-slate-200 object-cover"
                 />
               ) : (
-                <div className="h-12 w-12 shrink-0 rounded-md border border-dashed border-slate-200" />
+                <div className="h-20 w-20 shrink-0 rounded-md border border-dashed border-slate-200" />
               )}
               <div>
                 <p className="font-medium text-slate-900">{product.name}</p>
