@@ -12,9 +12,16 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 server:
   port: 8080
+  # Respects X-Forwarded-* headers from a reverse proxy (Phase 12's production Docker setup) when
+  # building absolute URLs, e.g. the product image URLs returned by ProductImageController.
+  forward-headers-strategy: framework
   error:
     include-stacktrace: never
     include-message: never
@@ -30,3 +37,5 @@ app:
   admin-bootstrap:
     email: ${ADMIN_BOOTSTRAP_EMAIL:}
     password: ${ADMIN_BOOTSTRAP_PASSWORD:}
+  storage:
+    product-images-dir: ${PRODUCT_IMAGES_DIR:./data/product-images}

@@ -86,6 +86,14 @@ public class ProductService {
     productRepository.save(product);
   }
 
+  /** Used by {@link ProductImageController} after storing/deleting the file on disk. */
+  @Transactional
+  public ProductResponse setImageUrl(UUID id, String imageUrl) {
+    Product product = findProductOrThrow(id);
+    product.setImageUrl(imageUrl);
+    return ProductResponse.from(productRepository.save(product));
+  }
+
   private boolean hasSkuConflict(String sku, UUID excludingId) {
     if (sku == null || sku.isBlank()) {
       return false;

@@ -41,6 +41,9 @@ public abstract class AbstractIntegrationTest {
         () ->
             Base64.getEncoder()
                 .encodeToString("test-only-secret-key-material-32-bytes!!".getBytes()));
+    registry.add(
+        "app.storage.product-images-dir",
+        () -> System.getProperty("java.io.tmpdir") + "/inventory-sales-test-images");
   }
 
   @Autowired protected MockMvc mockMvc;

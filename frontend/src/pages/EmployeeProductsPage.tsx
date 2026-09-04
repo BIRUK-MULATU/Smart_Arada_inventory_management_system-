@@ -58,11 +58,22 @@ export function EmployeeProductsPage() {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {filtered?.map((product) => (
-          <Card key={product.id} className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-slate-900">{product.name}</p>
-              <p className="text-xs uppercase tracking-wide text-slate-400">{product.categoryName}</p>
-              <p className="text-sm text-slate-500">${product.basePrice.toFixed(2)}</p>
+          <Card key={product.id} className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {product.imageUrl ? (
+                <img
+                  src={product.imageUrl}
+                  alt=""
+                  className="h-12 w-12 shrink-0 rounded-md border border-slate-200 object-cover"
+                />
+              ) : (
+                <div className="h-12 w-12 shrink-0 rounded-md border border-dashed border-slate-200" />
+              )}
+              <div>
+                <p className="font-medium text-slate-900">{product.name}</p>
+                <p className="text-xs uppercase tracking-wide text-slate-400">{product.categoryName}</p>
+                <p className="text-sm text-slate-500">${product.basePrice.toFixed(2)}</p>
+              </div>
             </div>
             <div className="text-right">
               <p className="text-sm text-slate-600">{product.stockQuantity} in stock</p>

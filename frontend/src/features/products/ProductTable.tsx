@@ -16,6 +16,7 @@ export function ProductTable({ products, onEdit, onDeactivate }: ProductTablePro
       <table className="min-w-full divide-y divide-slate-200 text-sm">
         <thead className="bg-slate-50">
           <tr>
+            <th className="px-4 py-2" />
             <th className="px-4 py-2 text-left font-medium text-slate-600">Name</th>
             <th className="px-4 py-2 text-left font-medium text-slate-600">Category</th>
             <th className="px-4 py-2 text-left font-medium text-slate-600">SKU</th>
@@ -28,6 +29,17 @@ export function ProductTable({ products, onEdit, onDeactivate }: ProductTablePro
         <tbody className="divide-y divide-slate-100">
           {products.map((product) => (
             <tr key={product.id}>
+              <td className="px-4 py-2">
+                {product.imageUrl ? (
+                  <img
+                    src={product.imageUrl}
+                    alt=""
+                    className="h-10 w-10 rounded-md border border-slate-200 object-cover"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-md border border-dashed border-slate-200" />
+                )}
+              </td>
               <td className="px-4 py-2 font-medium text-slate-900">{product.name}</td>
               <td className="px-4 py-2 text-slate-600">{product.categoryName}</td>
               <td className="px-4 py-2 text-slate-600">{product.sku ?? "—"}</td>

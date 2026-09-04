@@ -8,6 +8,7 @@ import { Modal } from "../components/Modal";
 import { useCategories } from "../features/categories/useCategories";
 import type { ProductFormValues } from "../features/products/ProductForm";
 import { ProductForm } from "../features/products/ProductForm";
+import { ProductImageUpload } from "../features/products/ProductImageUpload";
 import { ProductTable } from "../features/products/ProductTable";
 import { useCreateProduct, useDeactivateProduct, useProducts, useUpdateProduct } from "../features/products/useProducts";
 import type { Product } from "../types/product";
@@ -96,6 +97,14 @@ export function AdminProductsPage() {
           {formError && (
             <div className="mb-4">
               <ErrorMessage message={formError} />
+            </div>
+          )}
+          {dialog.mode === "edit" && (
+            <div className="mb-4">
+              <ProductImageUpload
+                product={dialog.product}
+                onUpdated={(product) => setDialog({ mode: "edit", product })}
+              />
             </div>
           )}
           <ProductForm

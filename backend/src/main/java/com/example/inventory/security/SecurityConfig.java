@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -72,6 +73,12 @@ public class SecurityConfig {
             authorize ->
                 authorize
                     .requestMatchers("/api/auth/login")
+                    .permitAll()
+                    // Product photos are rendered in plain <img> tags, which never send an
+                    // Authorization header, and aren't sensitive data - only the read is public;
+                    // uploading/deleting one still requires ADMIN (enforced by @PreAuthorize on
+                    // ProductImageController).
+                    .requestMatchers(HttpMethod.GET, "/api/products/*/image")
                     .permitAll()
                     .requestMatchers("/api/users/**")
                     .hasRole("ADMIN")

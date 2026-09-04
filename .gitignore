@@ -11,6 +11,9 @@ target/
 *.war
 .mvn/wrapper/maven-wrapper.jar
 
+# --- uploaded files (local dev storage) ---
+backend/data/
+
 # --- node / vite ---
 node_modules/
 dist/

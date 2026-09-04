@@ -35,3 +35,19 @@ export function useDeactivateProduct() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
   });
 }
+
+export function useUploadProductImage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) => productsApi.uploadImage(id, file),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
+  });
+}
+
+export function useRemoveProductImage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => productsApi.removeImage(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
+  });
+}
